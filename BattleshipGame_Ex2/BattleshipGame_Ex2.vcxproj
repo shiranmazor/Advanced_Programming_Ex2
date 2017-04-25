@@ -28,7 +28,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -110,6 +110,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="BattleBoard.h" />
+    <ClInclude Include="BattleshipGameAlgo.h" />
+    <ClInclude Include="BattleshipGameAlgoFile.h" />
+    <ClInclude Include="BattleshipGameAlgoNaive.h" />
+    <ClInclude Include="BattleshipGameAlgoSmart.h" />
+    <ClInclude Include="Common.h" />
+    <ClInclude Include="Game.h" />
+    <ClInclude Include="IBattleshipGameAlgo.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="BattleBoard.cpp" />
+    <ClCompile Include="BattleshipGameAlgo.cpp" />
+    <ClCompile Include="BattleshipGameAlgoFile.cpp" />
+    <ClCompile Include="BattleshipGameAlgoNaive.cpp" />
+    <ClCompile Include="BattleshipGameAlgoSmart.cpp" />
+    <ClCompile Include="Common.cpp" />
+    <ClCompile Include="MainGame.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
