@@ -11,7 +11,6 @@ void gotoxy(short col, short row)
 	COORD c = { col, row };
 	SetConsoleCursorPosition(h, c);
 }
-
 void setTextColor(int color)
 {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -100,14 +99,14 @@ bool loadAlgoDllFiles(string folder, vector<string> gameFiles
 	GetAlgorithmFuncType getAlgorithmFunc1;
 	GetAlgorithmFuncType getAlgorithmFunc2;
 	string dll1_path = gameFiles[1];
-	string algoName1;
-	string algoName2;
+	string algoName1 = dll1_path;
 	string dll2_path = gameFiles[2];
+	string algoName2 = dll2_path;
 	// Load dynamic library 1
 	HINSTANCE hDll1 = LoadLibraryA(dll1_path.c_str()); // Notice: Unicode compatible version of LoadLibrary
 	if (!hDll1)
 	{
-		std::cout << "could not load the dynamic library of first algo all" << std::endl;
+		std::cout << "Cannot load dll"+ dll1_path << std::endl;
 		return false;
 	}
 
@@ -124,12 +123,12 @@ bool loadAlgoDllFiles(string folder, vector<string> gameFiles
 	HINSTANCE hDll2 = LoadLibraryA(dll2_path.c_str()); // Notice: Unicode compatible version of LoadLibrary
 	if (!hDll2)
 	{
-		std::cout << "could not load the dynamic library of first algo all" << std::endl;
+		std::cout << "Cannot load dll" + dll2_path << std::endl;
 		return false;
 	}
 
 	// Get function pointer of dll 2
-	getAlgorithmFunc1 = (GetAlgorithmFuncType)GetProcAddress(hDll2, "GetAlgorithm");
+	getAlgorithmFunc2 = (GetAlgorithmFuncType)GetProcAddress(hDll2, "GetAlgorithm");
 	if (!getAlgorithmFunc2)
 	{
 		std::cout << "could not load function GetShape()" << std::endl;
@@ -154,7 +153,7 @@ void closeDLLs(vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>> & dll_vec)
 }
 bool CheckValidPath(vector<string> gameFiles, string path)
 {
-	bool sboard = false, one_dll = false, two_dll = false;
+	bool sboard = false;
 	if (gameFiles.size() == 3)
 		return true;
 
@@ -164,21 +163,25 @@ bool CheckValidPath(vector<string> gameFiles, string path)
 	{
 		if (fileIt->find("sboard") != std::string::npos)
 			sboard = true;
-		if (fileIt->find("dll") != std::string::npos)
-			one_dll = true;
 	}
 
 	if (!sboard)
 	{
-		cout << "Missing board file (*.sboard) looking in path:" + path << endl;
+		std::cout << "Missing board file (*.sboard) looking in path:" + path << endl;
 		return false;
 	}
-	
-	return true;
+
+	//missing dll file
+	std::cout << "Missing an algorithm (dll) file looking in path:" + path << endl;
+	return false;
+
+
+
 }
 
 
-int PlayGame(vector<string> gameFiles, vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>> dll_vec, bool isQuiet, int delay)
+int PlayGame(string path, vector<string> gameFiles, 
+	vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>> dll_vec, bool isQuiet, int delay)
 {
 	//create Ibattleship vector
 	vector<IBattleshipGameAlgo*> algo_vec;
@@ -204,7 +207,20 @@ int PlayGame(vector<string> gameFiles, vector<tuple<string, HINSTANCE, GetAlgori
 	mainBoard->getPlayerBoard(B, playerBoardB);
 	playerA->setBoard(0, const_cast<const char**>(playerBoardA), mainBoard->R, mainBoard->C);
 	playerA->setBoard(1, const_cast<const char**>(playerBoardB), mainBoard->R, mainBoard->C);
-
+	string fullFileName1 = get<0>(dll_vec[0]);
+	string fullFileName2 = get<0>(dll_vec[1]);
+	//call init
+	if (!playerA->init(path))
+	{
+		std::cout << "Algorithm initialization failed for dll:"+ fullFileName1 << endl;
+		return -1;
+	}
+		
+	if (!playerB->init(path))
+	{
+		std::cout << "Algorithm initialization failed for dll:" + fullFileName2 << endl;
+		return -1;
+	}
 	pair<int, int> attackMove;
 	//we starts with player A
 	IBattleshipGameAlgo* currentPlayer = playerA;
@@ -226,11 +242,6 @@ int PlayGame(vector<string> gameFiles, vector<tuple<string, HINSTANCE, GetAlgori
 			continue;
 		}
 		AttackResult moveRes = mainBoard->performGameMove(currentPlayer->playerName, attackMove);
-
-		if (!isQuiet)
-		{
-			//TODO: add board printing
-		}
 
 		//notify both players on the moveAttak results
 		playerA->notifyOnAttackResult(currentPlayer->playerName, attackMove.first, attackMove.second, moveRes);
@@ -254,15 +265,15 @@ int PlayGame(vector<string> gameFiles, vector<tuple<string, HINSTANCE, GetAlgori
 	if (victory)
 	{
 		if (winPlayer == A)
-			cout << "Player A won" << endl;
+			std::cout << "Player A won" << endl;
 		else if (winPlayer == B)
-			cout << "Player B won" << endl;
+			std::cout << "Player B won" << endl;
 	}
 	//points
-	cout << "Points:" << endl;
+	std::cout << "Points:" << endl;
 	pair<int, int> gameScore = mainBoard->CalcScore();
-	cout << "Player A: " << gameScore.first << endl;
-	cout << "Player B: " << gameScore.second << endl;
+	std::cout << "Player A: " << gameScore.first << endl;
+	std::cout << "Player B: " << gameScore.second << endl;
 
 	//outside loop, avoid memory leak
 	if (playerBoardA != NULL)
@@ -277,6 +288,8 @@ int PlayGame(vector<string> gameFiles, vector<tuple<string, HINSTANCE, GetAlgori
 	return 0;
 }
 
+
+
 int main(int argc, char **argv)
 {
 	string path;
@@ -289,7 +302,7 @@ int main(int argc, char **argv)
 	path = std::string(the_path);
 	bool isQuiet = false;
 	int delay = 100;
-	
+
 	// parse command line parameters
 	int i = 0;
 	while (i < argc)
@@ -325,50 +338,10 @@ int main(int argc, char **argv)
 	}
 
 	//load dll algo
-	loadAlgoDllFiles(path, gameFiles, dll_vec);
-	int ret = PlayGame(gameFiles, dll_vec, isQuiet, delay);
+	if (!loadAlgoDllFiles(path, gameFiles, dll_vec))
+		return -1;
+	int ret = PlayGame(path, gameFiles, dll_vec, isQuiet, delay);
 	closeDLLs(dll_vec);
 	return ret;
+
 }
-
-//int main(int argc, char **argv)
-//{
-//	string path;
-//	vector<string> gameFiles;
-//	vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>>  dll_vec;
-//	if (argc < 2)
-//	{
-//		char the_path[256];
-//		//use working directory
-//		_getcwd(the_path, 255);
-//		path = std::string(the_path);
-//	}
-//	else
-//		path = argv[1];
-//	if (!dirExists(path))
-//	{
-//		std::cout << "Wrong path:" + path << endl;
-//		return -1;
-//	}
-//
-//
-//	//path is valid, continue
-//	
-//	getGameFiles(path, gameFiles);
-//	if (!CheckValidPath(gameFiles, path))
-//	{
-//		std::cout << "Error game files are missing, Exiting game" << endl;
-//		return -1;
-//	}
-//
-//	//load dll algo
-//	loadAlgoDllFiles(path, gameFiles, dll_vec);
-//	int ret = PlayGame(gameFiles, dll_vec);
-//	closeDLLs(dll_vec);
-//	return ret;
-//
-//
-//}
-
-
-

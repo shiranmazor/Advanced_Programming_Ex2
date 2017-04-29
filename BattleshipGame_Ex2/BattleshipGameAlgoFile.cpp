@@ -1,6 +1,6 @@
 #include "BattleshipGameAlgoFile.h"
-#include <cctype>
-#include <utility>
+
+
 
 #define isPlayerTool(x, y) (x==A && (isupper(y) && !isspace(y)) || (x==B && (islower(y) && !isspace(y))))
 
@@ -24,27 +24,66 @@ void BattleshipGameAlgoFile::setBoard(int player, const char** board, int numRow
 
 bool BattleshipGameAlgoFile::init(const std::string& path)
 {
+	WIN32_FIND_DATAA search_data;
+	HANDLE handle;
+	string fullAttackPath1 = "";
+	string fullAttackPath2 = "";
+	string currentAttackpathFull;
+	memset(&search_data, 0, sizeof(WIN32_FIND_DATAA));
 	this->attackFilePath = path;
 	bool firstAttackFile = this->playerNum == 1 ? true : false;
-	//Todo: check that the path is correct and load attack files
+	//load first attack file in lexicographic order
+	string attackPath = this->attackFilePath + "\\*.attack";
+	handle = FindFirstFileA(attackPath.c_str(), &search_data);
+	if (handle != INVALID_HANDLE_VALUE)
+	{
+		//check file extension
+		string filename(search_data.cFileName);
+		if (filename.find("attack") != std::string::npos)
+		{
+			//found attack file
+			fullAttackPath1 = this->attackFilePath + "\\" + filename;			
+		}
+	}
+	//load second attack file - if exist:
+	if (FindNextFileA(handle, &search_data))
+	{
+		//check file extension
+		string filename(search_data.cFileName);
+		if (filename.find("attack") != std::string::npos)
+		{
+			//found attack file
+			fullAttackPath2 = this->attackFilePath + "\\" + filename;
+		}
+	}
+	
+	//check if attack files loaded:
+	if (fullAttackPath1 == "" && fullAttackPath2 == "")
+	{
+		cout << "Missing attack file for player (*.attack) looking in path:" + path << endl;
+		return false;
+	}
 	//load attack file to file handle assuming file path is correct:
+	currentAttackpathFull = fullAttackPath1;
+	if (!firstAttackFile && fullAttackPath2 != "")
+		currentAttackpathFull = fullAttackPath2;
+	
 	ifstream attackFile;
-	attackFile.open(this->attackFilePath);
+	attackFile.open(currentAttackpathFull);
 	if (attackFile.fail())
 	{
-		std::cout << "Error while open internal file" << std::endl;
+		std::cout << "Error while open attack file" << std::endl;
 		attackFile.close();
 		return false;
 	}
-	else //load all attack lines to movesQueue
+	 //load all attack lines to movesQueue
+	string line;
+	while (getline(attackFile, line))
 	{
-		string line;
-		while (getline(attackFile, line))
-		{
-			movesQueue.push(line);
-		}
-		attackFile.close();
+		movesQueue.push(line);
 	}
+	attackFile.close();
+	
 	return true;
 }
 

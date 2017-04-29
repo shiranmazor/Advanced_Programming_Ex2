@@ -34,7 +34,8 @@ bool CheckValidPath(vector<string> gameFiles, string path);
  * read needed game files from the directory and feel the gameFiles vector with the files path.
  * sboard file + 2 dll files
  */
-void getGameFiles(string folder, vector<string> & gameFiles);
+int PlayGame(string path,vector<string> gameFiles, 
+	vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>> dll_vec, bool isQuiet, int delay);
 bool loadAlgoDllFiles(string folder, vector<string> gameFiles
 	, vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>> & dll_vec);
 void closeDLLs(vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>> & dll_vec);
@@ -45,6 +46,6 @@ void setTextColor(int color);//added for future using
 							 * performing game steps and finish the game in case of victory or finished attack steps
 							 * gameFiles contains - sboard file, attack-a file,attack-b file by this order!
 							 */
-int PlayGame(vector<string> gameFiles, vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>> dll_vec);
+int PlayGame(string path,vector<string> gameFiles, vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>> dll_vec);
 
 
