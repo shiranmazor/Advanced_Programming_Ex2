@@ -46,8 +46,7 @@ bool BattleshipGameAlgoFile::init(const std::string& path)
 		}
 	}
 	//load second attack file - if exist:
-	handle = FindFirstFileA(attackPath.c_str(), &search_data);
-	if (handle != INVALID_HANDLE_VALUE)
+	if (FindNextFileA(handle, &search_data))
 	{
 		//check file extension
 		string filename(search_data.cFileName);

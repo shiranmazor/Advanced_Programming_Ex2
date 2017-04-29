@@ -181,7 +181,7 @@ bool CheckValidPath(vector<string> gameFiles, string path)
 
 
 int PlayGame(string path, vector<string> gameFiles, 
-	vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>> dll_vec)
+	vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>> dll_vec, bool isQuiet, int delay)
 {
 	//create Ibattleship vector
 	vector<IBattleshipGameAlgo*> algo_vec;
@@ -295,23 +295,41 @@ int main(int argc, char **argv)
 	string path;
 	vector<string> gameFiles;
 	vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>>  dll_vec;
-	if (argc < 2)
+	char the_path[256];
+
+	//setup defult parameters
+	_getcwd(the_path, 255);
+	path = std::string(the_path);
+	bool isQuiet = false;
+	int delay = 100;
+
+	// parse command line parameters
+	int i = 0;
+	while (i < argc)
 	{
-		char the_path[256];
-		//use working directory
-		_getcwd(the_path, 255);
-		path = std::string(the_path);
+		if (strcmp(argv[i], "-quite") == 0) {
+			isQuiet = true;
+		}
+		else if (strcmp(argv[i], "-delay") == 0) {
+			delay = atoi(argv[i + 1]);
+			i++;
+		}
+		else
+		{
+			path = path = argv[i];
+		}
+		i++;
 	}
-	else
-		path = argv[1];
+
+
 	if (!dirExists(path))
 	{
 		std::cout << "Wrong path:" + path << endl;
 		return -1;
 	}
 
-	//path is valid, continue
 
+	//path is valid, continue
 	getGameFiles(path, gameFiles);
 	if (!CheckValidPath(gameFiles, path))
 	{
@@ -322,11 +340,8 @@ int main(int argc, char **argv)
 	//load dll algo
 	if (!loadAlgoDllFiles(path, gameFiles, dll_vec))
 		return -1;
-
-	int ret = PlayGame(path, gameFiles, dll_vec);
+	int ret = PlayGame(path, gameFiles, dll_vec, isQuiet, delay);
 	closeDLLs(dll_vec);
 	return ret;
-
-
 
 }

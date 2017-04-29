@@ -34,7 +34,8 @@ bool CheckValidPath(vector<string> gameFiles, string path);
  * read needed game files from the directory and feel the gameFiles vector with the files path.
  * sboard file + 2 dll files
  */
-void getGameFiles(string folder, vector<string> & gameFiles);
+int PlayGame(string path,vector<string> gameFiles, 
+	vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>> dll_vec, bool isQuiet, int delay);
 bool loadAlgoDllFiles(string folder, vector<string> gameFiles
 	, vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>> & dll_vec);
 void closeDLLs(vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>> & dll_vec);
