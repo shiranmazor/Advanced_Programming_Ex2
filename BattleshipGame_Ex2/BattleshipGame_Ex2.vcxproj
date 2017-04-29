@@ -110,14 +110,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="BattleshipGameAlgoNaive.h" />
-    <ClInclude Include="BattleshipGameAlgoSmart.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="IBattleshipGameAlgo.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="BattleshipGameAlgoNaive.cpp" />
-    <ClCompile Include="BattleshipGameAlgoSmart.cpp" />
     <ClCompile Include="MainGame.cpp" />
   </ItemGroup>
   <ItemGroup>
