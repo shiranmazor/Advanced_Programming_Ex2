@@ -15,27 +15,15 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\BattleshipGame_Ex2\BattleshipGameAlgoFile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="IBattleshipGameAlgo.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Game.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="BattleshipGameAlgoNaive.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="BattleshipGameAlgoSmart.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="MainGame.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BattleshipGameAlgoNaive.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BattleshipGameAlgoSmart.cpp">
+    <ClCompile Include="..\BattleshipGame_Ex2\BattleshipGameAlgoFile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

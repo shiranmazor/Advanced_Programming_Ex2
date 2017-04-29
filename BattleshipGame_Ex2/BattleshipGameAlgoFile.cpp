@@ -4,22 +4,32 @@
 
 #define isPlayerTool(x, y) (x==A && (isupper(y) && !isspace(y)) || (x==B && (islower(y) && !isspace(y))))
 
+
+IBattleshipGameAlgo* GetAlgorithm()
+{
+	_instancesVec.push_back(new BattleshipGameAlgoFile());	// Create new instance and keep it in vector
+	return _instancesVec[_instancesVec.size() - 1];		// Return last instance
+}
+
 void BattleshipGameAlgoFile::setBoard(int player, const char** board, int numRows, int numCols)
 {
+	this->playerNum = player;
+	this->playerName = (player == 0) ? A : B;
 	if (this->playerBoard != nullptr)
 		delete this->playerBoard; //avoid memory leak
 
 	this->playerBoard = new BattleBoard(board, numRows, numCols);
-	this->playerNum = player;
-
+	
 }
+
 bool BattleshipGameAlgoFile::init(const std::string& path)
 {
+	this->attackFilePath = path;
 	bool firstAttackFile = this->playerNum == 1 ? true : false;
 	//Todo: check that the path is correct and load attack files
 	//load attack file to file handle assuming file path is correct:
 	ifstream attackFile;
-	attackFile.open(attackFilePath);
+	attackFile.open(this->attackFilePath);
 	if (attackFile.fail())
 	{
 		std::cout << "Error while open internal file" << std::endl;

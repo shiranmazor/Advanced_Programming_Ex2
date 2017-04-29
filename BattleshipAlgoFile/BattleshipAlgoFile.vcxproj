@@ -19,13 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{34934993-1150-4DBD-96C0-BE2A35A8E131}</ProjectGuid>
-    <RootNamespace>BattleshipGame_Ex2</RootNamespace>
+    <ProjectGuid>{639BBC69-EEA0-4148-9FC3-7C330D6E39AF}</ProjectGuid>
+    <RootNamespace>BattleshipAlgoFile</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
@@ -110,15 +110,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="BattleshipGameAlgoNaive.h" />
-    <ClInclude Include="BattleshipGameAlgoSmart.h" />
-    <ClInclude Include="Game.h" />
+    <ClInclude Include="..\BattleshipGame_Ex2\BattleshipGameAlgoFile.h" />
     <ClInclude Include="IBattleshipGameAlgo.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="BattleshipGameAlgoNaive.cpp" />
-    <ClCompile Include="BattleshipGameAlgoSmart.cpp" />
-    <ClCompile Include="MainGame.cpp" />
+    <ClCompile Include="..\BattleshipGame_Ex2\BattleshipGameAlgoFile.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.vcxproj">

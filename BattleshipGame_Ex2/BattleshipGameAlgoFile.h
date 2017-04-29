@@ -27,11 +27,8 @@ public:
 	BattleshipGameAlgoFile& operator = (const BattleshipGameAlgoFile&) = delete;
 
 	//constructor
-	BattleshipGameAlgoFile(Player playerName, string attackFilePath)
+	BattleshipGameAlgoFile()
 	{
-		this->playerName = playerName;
-		this->attackFilePath = attackFilePath;
-		
 
 	}
 	~BattleshipGameAlgoFile()

@@ -1,5 +1,5 @@
 #pragma once
-#include "BattleshipGameAlgoFile.h"
+#include "IBattleshipGameAlgo.h"
 #include <iostream>
 #include <string>
 #include <direct.h>
@@ -7,6 +7,7 @@
 #include <windows.h>
 #include <stdio.h>
 #include "time.h"
+#include "Common.h"
 
 
 
@@ -19,6 +20,10 @@ using namespace std;
 #define YELLOW 14;
 #define WHITE 15;
 
+// define function of the type we expect
+typedef IBattleshipGameAlgo *(*GetAlgorithmFuncType)();
+
+
 /*
  * check if the files below exist in the given path:
  * one sboard file and 2 dll files
@@ -30,7 +35,8 @@ bool CheckValidPath(vector<string> gameFiles, string path);
  * sboard file + 2 dll files
  */
 void getGameFiles(string folder, vector<string> & gameFiles);
-void loadAlgoDllFiles(string folder, vector<tuple<string, HINSTANCE>> & dll_vec);
+bool loadAlgoDllFiles(string folder, vector<string> gameFiles
+	, vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>> & dll_vec);
 bool dirExists(const std::string& dirName_in);
 void gotoxy(short col, short row); //added for future using
 void setTextColor(int color);//added for future using

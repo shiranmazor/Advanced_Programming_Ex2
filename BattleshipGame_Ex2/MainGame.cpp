@@ -1,4 +1,6 @@
 #include "Game.h"
+#include <tuple>
+#include "BattleBoard.h"
 
 void gotoxy(short col, short row)
 {
@@ -18,13 +20,14 @@ void setTextColor(int color)
 /*
 * get current working directory path
 */
-BattleshipGameAlgoFile* swapPlayer(BattleshipGameAlgoFile* current, BattleshipGameAlgoFile* pA, BattleshipGameAlgoFile* pB)
+IBattleshipGameAlgo* swapPlayer(IBattleshipGameAlgo* current, IBattleshipGameAlgo* pA, IBattleshipGameAlgo* pB)
 {
 	if (current->playerName == pA->playerName)
 		return pB;
 	else
 		return pA;
 }
+
 bool dirExists(const std::string& dirName_in)
 {
 	DWORD ftyp = GetFileAttributesA(dirName_in.c_str());
@@ -60,7 +63,7 @@ void getGameFiles(string folder, vector<string> & gameFiles)
 		}
 	}
 
-	//start with attack-a files
+	//search 2 dll files:
 	string dll1 = folder + "\\*.dll";
 	handle = FindFirstFileA(dll1.c_str(), &search_data);
 
@@ -88,9 +91,54 @@ void getGameFiles(string folder, vector<string> & gameFiles)
 		}
 	}
 }
-void loadAlgoDllFiles(string folder, vector<tuple<string, HINSTANCE>> & dll_vec)
+
+bool loadAlgoDllFiles(string folder, vector<string> gameFiles
+	,vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>> & dll_vec)
 {
-	
+	GetAlgorithmFuncType getAlgorithmFunc1;
+	GetAlgorithmFuncType getAlgorithmFunc2;
+	string dll1_path = gameFiles[1];
+	string algoName1;
+	string algoName2;
+	string dll2_path = gameFiles[2];
+	// Load dynamic library 1
+	HINSTANCE hDll1 = LoadLibraryA(dll1_path.c_str()); // Notice: Unicode compatible version of LoadLibrary
+	if (!hDll1)
+	{
+		std::cout << "could not load the dynamic library of first algo all" << std::endl;
+		return false;
+	}
+
+	// Get function pointer of dll 1
+	getAlgorithmFunc1 = (GetAlgorithmFuncType)GetProcAddress(hDll1, "GetAlgorithm");
+	if (!getAlgorithmFunc1)
+	{
+		std::cout << "could not load function GetShape()" << std::endl;
+		return false;
+	}
+	dll_vec.push_back(make_tuple(algoName1, hDll1, getAlgorithmFunc1));
+
+	// Load dynamic library 1
+	HINSTANCE hDll2 = LoadLibraryA(dll2_path.c_str()); // Notice: Unicode compatible version of LoadLibrary
+	if (!hDll2)
+	{
+		std::cout << "could not load the dynamic library of first algo all" << std::endl;
+		return false;
+	}
+
+	// Get function pointer of dll 2
+	getAlgorithmFunc1 = (GetAlgorithmFuncType)GetProcAddress(hDll2, "GetAlgorithm");
+	if (!getAlgorithmFunc2)
+	{
+		std::cout << "could not load function GetShape()" << std::endl;
+		return false;
+	}
+	dll_vec.push_back(make_tuple(algoName2, hDll2, getAlgorithmFunc2));
+
+	if (dll_vec.size() == 2)
+		return true;
+	else
+		return false;
 }
 
 bool CheckValidPath(vector<string> gameFiles, string path)
@@ -109,22 +157,12 @@ bool CheckValidPath(vector<string> gameFiles, string path)
 			one_dll = true;
 	}
 
-
 	if (!sboard)
 	{
 		cout << "Missing board file (*.sboard) looking in path:" + path << endl;
 		return false;
 	}
-	if (!attacka)
-	{
-		cout << "Missing attack file for player A (*.attack-a) looking in path:" + path << endl;
-		return false;
-	}
-	if (!attackb)
-	{
-		cout << "Missing attack file for player B (*.attack-b) looking in path:" + path << endl;
-		return false;
-	}
+	
 	return true;
 }
 
@@ -151,8 +189,6 @@ int PlayGame(vector<string> gameFiles)
 	mainBoard->getPlayerBoard(playerB->playerName, playerBoardB);
 	//playerA->setBoard(const_cast<const char**>(playerBoardA), mainBoard->R, mainBoard->C);
 	//playerB->setBoard(const_cast<const char**>(playerBoardB), mainBoard->R, mainBoard->C);
-
-
 	pair<int, int> attackMove;
 	//we starts with player A
 	BattleshipGameAlgoFile* currentPlayer = playerA;
@@ -224,7 +260,6 @@ int PlayGame(vector<string> gameFiles)
 
 int main(int argc, char **argv)
 {
-
 	string path;
 	if (argc < 2)
 	{
@@ -249,7 +284,6 @@ int main(int argc, char **argv)
 		std::cout << "Error game files are missing, Exiting game" << endl;
 		return -1;
 	}
-
 	return 	PlayGame(gameFiles);
 
 
