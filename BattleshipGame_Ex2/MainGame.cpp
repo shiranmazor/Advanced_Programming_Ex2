@@ -206,7 +206,7 @@ int PlayGame(string path, vector<string> gameFiles,
 	mainBoard->getPlayerBoard(A, playerBoardA);
 	mainBoard->getPlayerBoard(B, playerBoardB);
 	playerA->setBoard(0, const_cast<const char**>(playerBoardA), mainBoard->R, mainBoard->C);
-	playerA->setBoard(1, const_cast<const char**>(playerBoardB), mainBoard->R, mainBoard->C);
+	playerB->setBoard(1, const_cast<const char**>(playerBoardB), mainBoard->R, mainBoard->C);
 	string fullFileName1 = get<0>(dll_vec[0]);
 	string fullFileName2 = get<0>(dll_vec[1]);
 	//call init
