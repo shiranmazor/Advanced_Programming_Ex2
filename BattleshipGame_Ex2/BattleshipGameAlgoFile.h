@@ -7,6 +7,9 @@
 #include "BattleBoard.h"
 #include <queue> 
 #include "Common.h"
+#include <windows.h>
+#include <cctype>
+#include <utility>
 
 using namespace std;
 

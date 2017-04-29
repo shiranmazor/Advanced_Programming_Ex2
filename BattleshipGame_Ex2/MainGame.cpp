@@ -167,12 +167,12 @@ bool CheckValidPath(vector<string> gameFiles, string path)
 
 	if (!sboard)
 	{
-		cout << "Missing board file (*.sboard) looking in path:" + path << endl;
+		std::cout << "Missing board file (*.sboard) looking in path:" + path << endl;
 		return false;
 	}
 
 	//missing dll file
-	cout << "Missing an algorithm (dll) file looking in path:" + path << endl;
+	std::cout << "Missing an algorithm (dll) file looking in path:" + path << endl;
 	return false;
 
 
