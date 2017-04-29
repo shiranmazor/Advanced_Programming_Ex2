@@ -11,6 +11,7 @@ void gotoxy(short col, short row)
 	COORD c = { col, row };
 	SetConsoleCursorPosition(h, c);
 }
+
 void setTextColor(int color)
 {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -177,7 +178,7 @@ bool CheckValidPath(vector<string> gameFiles, string path)
 }
 
 
-int PlayGame(vector<string> gameFiles, vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>> dll_vec)
+int PlayGame(vector<string> gameFiles, vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>> dll_vec, bool isQuiet, int delay)
 {
 	//create Ibattleship vector
 	vector<IBattleshipGameAlgo*> algo_vec;
@@ -226,6 +227,11 @@ int PlayGame(vector<string> gameFiles, vector<tuple<string, HINSTANCE, GetAlgori
 		}
 		AttackResult moveRes = mainBoard->performGameMove(currentPlayer->playerName, attackMove);
 
+		if (!isQuiet)
+		{
+			//TODO: add board printing
+		}
+
 		//notify both players on the moveAttak results
 		playerA->notifyOnAttackResult(currentPlayer->playerName, attackMove.first, attackMove.second, moveRes);
 		playerB->notifyOnAttackResult(currentPlayer->playerName, attackMove.first, attackMove.second, moveRes);
@@ -271,30 +277,46 @@ int PlayGame(vector<string> gameFiles, vector<tuple<string, HINSTANCE, GetAlgori
 	return 0;
 }
 
-
-
 int main(int argc, char **argv)
 {
 	string path;
 	vector<string> gameFiles;
 	vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>>  dll_vec;
-	if (argc < 2)
+	char the_path[256];
+
+	//setup defult parameters
+	_getcwd(the_path, 255);
+	path = std::string(the_path);
+	bool isQuiet = false;
+	int delay = 100;
+	
+	// parse command line parameters
+	int i = 0;
+	while (i < argc)
 	{
-		char the_path[256];
-		//use working directory
-		_getcwd(the_path, 255);
-		path = std::string(the_path);
+		if (strcmp(argv[i], "-quite") == 0) {
+			isQuiet = true;
+		}
+		else if (strcmp(argv[i], "-delay") == 0) {
+			delay = atoi(argv[i + 1]);
+			i++;
+		}
+		else
+		{
+			path = path = argv[i];
+		}
+		i++;
 	}
-	else
-		path = argv[1];
+
+
 	if (!dirExists(path))
 	{
 		std::cout << "Wrong path:" + path << endl;
 		return -1;
 	}
 
+
 	//path is valid, continue
-	
 	getGameFiles(path, gameFiles);
 	if (!CheckValidPath(gameFiles, path))
 	{
@@ -304,9 +326,49 @@ int main(int argc, char **argv)
 
 	//load dll algo
 	loadAlgoDllFiles(path, gameFiles, dll_vec);
-	int ret= PlayGame(gameFiles, dll_vec);
+	int ret = PlayGame(gameFiles, dll_vec, isQuiet, delay);
 	closeDLLs(dll_vec);
 	return ret;
-
-
 }
+
+//int main(int argc, char **argv)
+//{
+//	string path;
+//	vector<string> gameFiles;
+//	vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>>  dll_vec;
+//	if (argc < 2)
+//	{
+//		char the_path[256];
+//		//use working directory
+//		_getcwd(the_path, 255);
+//		path = std::string(the_path);
+//	}
+//	else
+//		path = argv[1];
+//	if (!dirExists(path))
+//	{
+//		std::cout << "Wrong path:" + path << endl;
+//		return -1;
+//	}
+//
+//
+//	//path is valid, continue
+//	
+//	getGameFiles(path, gameFiles);
+//	if (!CheckValidPath(gameFiles, path))
+//	{
+//		std::cout << "Error game files are missing, Exiting game" << endl;
+//		return -1;
+//	}
+//
+//	//load dll algo
+//	loadAlgoDllFiles(path, gameFiles, dll_vec);
+//	int ret = PlayGame(gameFiles, dll_vec);
+//	closeDLLs(dll_vec);
+//	return ret;
+//
+//
+//}
+
+
+

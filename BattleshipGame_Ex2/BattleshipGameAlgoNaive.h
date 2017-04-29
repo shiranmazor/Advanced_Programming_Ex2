@@ -13,7 +13,6 @@ using namespace std;
 class BattleshipGameAlgoNaive : public IBattleshipGameAlgo
 {
 public:
-	Player playerName;
 	BattleBoard* playerBoard = nullptr;
 	queue<pair<int,int>> attackQueue;
 
