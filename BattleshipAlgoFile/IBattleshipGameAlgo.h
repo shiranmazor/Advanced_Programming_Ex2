@@ -3,6 +3,7 @@
 #include <utility> // for std::pair
 #include <string>
 #include <vector>
+#include "../BattleshipGame_Ex2/Common.h"
 
 enum class AttackResult {
 	Miss, Hit, Sink
@@ -11,6 +12,8 @@ enum class AttackResult {
 // IBattleshipGameAlgo for Ex2 - do not change this class - you should use it as is
 class IBattleshipGameAlgo {
 public:
+	Player playerName;
+	int playerNum;
 	virtual ~IBattleshipGameAlgo();
 	virtual void setBoard(int player, const char** board, int numRows, int numCols) = 0;		// called once to notify player on his board
 	virtual bool init(const std::string& path) = 0;		// called once to allow init from files if needed returns whether the init succeeded or failed

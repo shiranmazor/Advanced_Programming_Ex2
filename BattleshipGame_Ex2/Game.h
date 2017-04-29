@@ -37,6 +37,7 @@ bool CheckValidPath(vector<string> gameFiles, string path);
 void getGameFiles(string folder, vector<string> & gameFiles);
 bool loadAlgoDllFiles(string folder, vector<string> gameFiles
 	, vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>> & dll_vec);
+void closeDLLs(vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>> & dll_vec);
 bool dirExists(const std::string& dirName_in);
 void gotoxy(short col, short row); //added for future using
 void setTextColor(int color);//added for future using
@@ -44,6 +45,6 @@ void setTextColor(int color);//added for future using
 							 * performing game steps and finish the game in case of victory or finished attack steps
 							 * gameFiles contains - sboard file, attack-a file,attack-b file by this order!
 							 */
-int PlayGame(vector<string> gameFiles);
+int PlayGame(vector<string> gameFiles, vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>> dll_vec);
 
 
