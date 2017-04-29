@@ -242,6 +242,11 @@ int PlayGame(string path, vector<string> gameFiles,
 			continue;
 		}
 		AttackResult moveRes = mainBoard->performGameMove(currentPlayer->playerName, attackMove);
+		
+		if (!isQuiet)
+		{
+			//TODO: add board printing
+		}
 
 		//notify both players on the moveAttak results
 		playerA->notifyOnAttackResult(currentPlayer->playerName, attackMove.first, attackMove.second, moveRes);
