@@ -111,7 +111,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="BattleBoard.h" />
-    <ClInclude Include="BattleshipGameAlgo.h" />
     <ClInclude Include="BattleshipGameAlgoFile.h" />
     <ClInclude Include="BattleshipGameAlgoNaive.h" />
     <ClInclude Include="BattleshipGameAlgoSmart.h" />
@@ -121,7 +120,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BattleBoard.cpp" />
-    <ClCompile Include="BattleshipGameAlgo.cpp" />
     <ClCompile Include="BattleshipGameAlgoFile.cpp" />
     <ClCompile Include="BattleshipGameAlgoNaive.cpp" />
     <ClCompile Include="BattleshipGameAlgoSmart.cpp" />

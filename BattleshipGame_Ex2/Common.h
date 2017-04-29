@@ -2,6 +2,12 @@
 #include <vector>
 #include <sstream>
 
+#define MyHitMark '*'
+#define OpHitMark '#'
+#define MyMissMark '~'
+#define OpMissMark '^'
+#define MySinkMark '!'
+#define OpSinkMark '?'
 
 enum Player { A, B };
 using namespace std;

@@ -10,10 +10,31 @@ void BattleshipGameAlgoFile::setBoard(int player, const char** board, int numRow
 		delete this->playerBoard; //avoid memory leak
 
 	this->playerBoard = new BattleBoard(board, numRows, numCols);
+	this->playerNum = player;
 
 }
 bool BattleshipGameAlgoFile::init(const std::string& path)
 {
+	bool firstAttackFile = this->playerNum == 1 ? true : false;
+	//Todo: check that the path is correct and load attack files
+	//load attack file to file handle assuming file path is correct:
+	ifstream attackFile;
+	attackFile.open(attackFilePath);
+	if (attackFile.fail())
+	{
+		std::cout << "Error while open internal file" << std::endl;
+		attackFile.close();
+		return false;
+	}
+	else //load all attack lines to movesQueue
+	{
+		string line;
+		while (getline(attackFile, line))
+		{
+			movesQueue.push(line);
+		}
+		attackFile.close();
+	}
 	return true;
 }
 

@@ -6,19 +6,16 @@
 #include "IBattleshipGameAlgo.h"
 #include "BattleBoard.h"
 #include <queue> 
+#include "Common.h"
 
 using namespace std;
 
-#define MyHitMark '*'
-#define OpHitMark '#'
-#define MyMissMark '~'
-#define OpMissMark '^'
-#define MySinkMark '!'
-#define OpSinkMark '?'
+
 
 class BattleshipGameAlgoFile : public IBattleshipGameAlgo
 {
 public:
+	int playerNum;
 	Player playerName;
 	BattleBoard* playerBoard = nullptr;
 	string attackFilePath;
@@ -34,23 +31,7 @@ public:
 	{
 		this->playerName = playerName;
 		this->attackFilePath = attackFilePath;
-		//load attack file to file handle assuming file path is correct:
-		ifstream attackFile;
-		attackFile.open(attackFilePath);
-		if (attackFile.fail())
-		{
-			std::cout << "Error while open internal file" << std::endl;
-			attackFile.close();
-		}
-		else //load all attack lines to movesQueue
-		{
-			string line;
-			while (getline(attackFile, line))
-			{
-				movesQueue.push(line);
-			}
-			attackFile.close();
-		}
+		
 
 	}
 	~BattleshipGameAlgoFile()

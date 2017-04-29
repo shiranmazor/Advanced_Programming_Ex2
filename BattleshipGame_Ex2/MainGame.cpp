@@ -61,60 +61,54 @@ void getGameFiles(string folder, vector<string> & gameFiles)
 	}
 
 	//start with attack-a files
-	string attackAPath = folder + "\\*.attack-a";
-	handle = FindFirstFileA(attackAPath.c_str(), &search_data);
+	string dll1 = folder + "\\*.dll";
+	handle = FindFirstFileA(dll1.c_str(), &search_data);
 
 	if (handle != INVALID_HANDLE_VALUE)
 	{
 		//check file extension
 		string filename(search_data.cFileName);
-
-		if (filename.find("attack-a") != std::string::npos)
+		if (filename.find("dll") != std::string::npos)
 		{
-			//found sboard file
+			//found  file
 			string fullPath = folder + "\\" + filename;
 			gameFiles.push_back(fullPath);
 		}
 	}
-
-	//start with attack-b files
-	string attackBPath = folder + "\\*.attack-b";
-	handle = FindFirstFileA(attackBPath.c_str(), &search_data);
-
-	if (handle != INVALID_HANDLE_VALUE)
+	//find dll2:
+	if (FindNextFileA(handle, &search_data))
 	{
 		//check file extension
 		string filename(search_data.cFileName);
-
-		if (filename.find("attack-b") != std::string::npos)
+		if (filename.find("dll") != std::string::npos)
 		{
-			//found sboard file
+			//found  file
 			string fullPath = folder + "\\" + filename;
 			gameFiles.push_back(fullPath);
 		}
 	}
 }
+void loadAlgoDllFiles(string folder, vector<tuple<string, HINSTANCE>> & dll_vec)
+{
+	
+}
 
 bool CheckValidPath(vector<string> gameFiles, string path)
 {
-	bool sboard = false, attacka = false, attackb = false;
+	bool sboard = false, one_dll = false, two_dll = false;
 	if (gameFiles.size() == 3)
 		return true;
-	else
-	{
-		//check which file is missing and print message
-		vector<string>::iterator fileIt;
-		for (fileIt = gameFiles.begin(); fileIt != gameFiles.end(); ++fileIt)
-		{
-			if (fileIt->find("sboard") != std::string::npos)
-				sboard = true;
-			if (fileIt->find("attack-a") != std::string::npos)
-				attacka = true;
-			if (fileIt->find("attack-b") != std::string::npos)
-				attackb = true;
 
-		}
+	//check which file is missing and print message
+	vector<string>::iterator fileIt;
+	for (fileIt = gameFiles.begin(); fileIt != gameFiles.end(); ++fileIt)
+	{
+		if (fileIt->find("sboard") != std::string::npos)
+			sboard = true;
+		if (fileIt->find("dll") != std::string::npos)
+			one_dll = true;
 	}
+
 
 	if (!sboard)
 	{
