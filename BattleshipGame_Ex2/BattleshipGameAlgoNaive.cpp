@@ -2,14 +2,22 @@
 #include <cctype>
 #include <utility>
 
-
-std::pair<int, int> BattleshipGameAlgoNaive::attack()
+IBattleshipGameAlgo* GetAlgorithm()
 {
-	pair<int, int> attack = this->attackQueue.front();
-	this->attackQueue.pop();
-	return attack;
+	_instancesVec.push_back(new BattleshipGameAlgoNaive());	// Create new instance and keep it in vector
+	return _instancesVec[_instancesVec.size() - 1];		// Return last instance
 }
 
+void BattleshipGameAlgoNaive::setBoard(int player, const char** board, int numRows, int numCols)
+{
+	this->playerNum = player;
+	this->playerName = (player == 0) ? A : B;
+	if (this->playerBoard != nullptr)
+		delete this->playerBoard; //avoid memory leak
+
+	this->playerBoard = new BattleBoard(board, numRows, numCols);
+
+}
 
 bool _canAttack(BattleBoard* b, int i, int j)
 {	
@@ -41,6 +49,39 @@ bool BattleshipGameAlgoNaive::init(const std::string& path)
 				attackQueue.push(std::make_pair(i, j));
 			}
 		}
+	}
+	return true;
+}
+
+
+std::pair<int, int> BattleshipGameAlgoNaive::attack()
+{
+	while (!this->attackQueue.empty())
+	{
+		pair<int, int> attack = this->attackQueue.front();
+		this->attackQueue.pop();
+		return attack;
+	}
+	return make_pair(-1, -1);
+}
+
+void BattleshipGameAlgoNaive::notifyOnAttackResult(int player, int row, int col, AttackResult result)
+{
+	char c = this->playerBoard->board[row][col];
+	bool isOppVessel = (islower(c) && this->playerName == A) || (isupper(c) && this->playerName == B);
+	switch (result) {
+	case AttackResult::Miss:
+		this->playerBoard->board[row][col] = isOppVessel ? OpMissMark : MyMissMark;
+		break;
+	case AttackResult::Hit:
+		this->playerBoard->board[row][col] = isOppVessel ? OpHitMark : MyHitMark;
+		break;
+	case AttackResult::Sink:
+		this->playerBoard->board[row][col] = isOppVessel ? OpSinkMark : MySinkMark; //TODO: mark all the other hits as sink as well
+		break;
+	default:
+		//TODO: print err (unknown attackres)
+		break;
 	}
 }
 
