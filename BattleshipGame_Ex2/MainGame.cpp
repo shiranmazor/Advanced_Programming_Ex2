@@ -1,6 +1,7 @@
 #include "Game.h"
 #include <tuple>
 #include "BattleBoard.h"
+#include "BattleshipGameAlgoFile.h"
 
 void gotoxy(short col, short row)
 {
@@ -141,6 +142,15 @@ bool loadAlgoDllFiles(string folder, vector<string> gameFiles
 		return false;
 }
 
+void closeDLLs(vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>> & dll_vec)
+{
+	vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>>::iterator vitr;
+	// close all the dynamic libs we opened
+	for (vitr = dll_vec.begin(); vitr != dll_vec.end(); ++vitr)
+	{
+		FreeLibrary(get<1>(*vitr));
+	}
+}
 bool CheckValidPath(vector<string> gameFiles, string path)
 {
 	bool sboard = false, one_dll = false, two_dll = false;
@@ -167,9 +177,10 @@ bool CheckValidPath(vector<string> gameFiles, string path)
 }
 
 
-int PlayGame(vector<string> gameFiles)
+int PlayGame(vector<string> gameFiles, vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>> dll_vec)
 {
-
+	//create Ibattleship vector
+	vector<IBattleshipGameAlgo*> algo_vec;
 	bool victory = false;
 	int winPlayer = 2;
 	char** playerBoardA = NULL;
@@ -181,17 +192,21 @@ int PlayGame(vector<string> gameFiles)
 		//  invalid board
 		return -1;
 	}
+	//add algorithms to algo_vec vector
+	algo_vec.push_back(get<2>(dll_vec[0])());
+	algo_vec.push_back(get<2>(dll_vec[1])());
 
 	//create players object
-	BattleshipGameAlgoFile* playerA = new BattleshipGameAlgoFile(A, gameFiles[1]);
-	BattleshipGameAlgoFile* playerB = new BattleshipGameAlgoFile(B, gameFiles[2]);
-	mainBoard->getPlayerBoard(playerA->playerName, playerBoardA);
-	mainBoard->getPlayerBoard(playerB->playerName, playerBoardB);
-	//playerA->setBoard(const_cast<const char**>(playerBoardA), mainBoard->R, mainBoard->C);
-	//playerB->setBoard(const_cast<const char**>(playerBoardB), mainBoard->R, mainBoard->C);
+	IBattleshipGameAlgo* playerA = (algo_vec[0]);
+	IBattleshipGameAlgo* playerB = (algo_vec[1]);
+	mainBoard->getPlayerBoard(A, playerBoardA);
+	mainBoard->getPlayerBoard(B, playerBoardB);
+	playerA->setBoard(0, const_cast<const char**>(playerBoardA), mainBoard->R, mainBoard->C);
+	playerA->setBoard(1, const_cast<const char**>(playerBoardB), mainBoard->R, mainBoard->C);
+
 	pair<int, int> attackMove;
 	//we starts with player A
-	BattleshipGameAlgoFile* currentPlayer = playerA;
+	IBattleshipGameAlgo* currentPlayer = playerA;
 	bool onePlayerGame = false;
 
 	while (!victory)
@@ -261,6 +276,8 @@ int PlayGame(vector<string> gameFiles)
 int main(int argc, char **argv)
 {
 	string path;
+	vector<string> gameFiles;
+	vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>>  dll_vec;
 	if (argc < 2)
 	{
 		char the_path[256];
@@ -277,14 +294,19 @@ int main(int argc, char **argv)
 	}
 
 	//path is valid, continue
-	vector<string> gameFiles;
+	
 	getGameFiles(path, gameFiles);
 	if (!CheckValidPath(gameFiles, path))
 	{
 		std::cout << "Error game files are missing, Exiting game" << endl;
 		return -1;
 	}
-	return 	PlayGame(gameFiles);
+
+	//load dll algo
+	loadAlgoDllFiles(path, gameFiles, dll_vec);
+	int ret= PlayGame(gameFiles, dll_vec);
+	closeDLLs(dll_vec);
+	return ret;
 
 
 }

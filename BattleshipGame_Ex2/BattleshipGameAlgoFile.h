@@ -15,8 +15,8 @@ using namespace std;
 class BattleshipGameAlgoFile : public IBattleshipGameAlgo
 {
 public:
-	int playerNum;
-	Player playerName;
+	
+	
 	BattleBoard* playerBoard = nullptr;
 	string attackFilePath;
 	queue<string> movesQueue;
