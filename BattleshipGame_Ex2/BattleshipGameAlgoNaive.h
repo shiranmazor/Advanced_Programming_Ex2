@@ -3,6 +3,7 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <queue> 
 #include "IBattleshipGameAlgo.h"
 #include "BattleBoard.h"
 #include "Common.h"
@@ -14,6 +15,7 @@ class BattleshipGameAlgoNaive : public IBattleshipGameAlgo
 public:
 	Player playerName;
 	BattleBoard* playerBoard = nullptr;
+	queue<pair<int,int>> attackQueue;
 
 	// Blocking Copy and Assignment
 	BattleshipGameAlgoNaive(const BattleshipGameAlgoNaive&) = delete;
