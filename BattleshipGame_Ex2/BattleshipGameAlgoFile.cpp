@@ -31,7 +31,7 @@ bool BattleshipGameAlgoFile::init(const std::string& path)
 	string currentAttackpathFull;
 	memset(&search_data, 0, sizeof(WIN32_FIND_DATAA));
 	this->attackFilePath = path;
-	bool firstAttackFile = this->playerNum == 1 ? true : false;
+	bool firstAttackFile = this->playerNum == 0 ? true : false;
 	//load first attack file in lexicographic order
 	string attackPath = this->attackFilePath + "\\*.attack";
 	handle = FindFirstFileA(attackPath.c_str(), &search_data);

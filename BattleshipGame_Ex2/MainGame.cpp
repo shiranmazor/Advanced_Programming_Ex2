@@ -287,8 +287,8 @@ int PlayGame(string path, vector<string> gameFiles,
 		delete[] playerBoardB;
 
 	//delete objects
-	delete playerA;
-	delete playerB;
+	//delete playerA;
+	//delete playerB;
 	delete mainBoard;
 	return 0;
 }
