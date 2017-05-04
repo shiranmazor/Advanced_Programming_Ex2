@@ -95,7 +95,7 @@ public:
 				if (!isCharValid(this->board[i][j])) this->board[i][j] = ' ';
 	}
 
-	BattleBoard(const char** initBoard, int R = 10, int C = 10)
+	BattleBoard(const char** initBoard, int R = 10, int C = 10) :playerToolsNum(5)
 	{
 		this->R = R;
 		this->C = C;

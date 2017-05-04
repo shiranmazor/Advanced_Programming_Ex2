@@ -21,7 +21,7 @@ void BattleshipGameAlgoSmart::setBoard(int player, const char** board, int numRo
 
 bool BattleshipGameAlgoSmart::_canAttack(int i, int j)
 {
-	return (this->irrelevantCells.find(make_pair(i, j)) == this->irrelevantCells.end() && i + 1 < this->playerBoard->R && i > 0 && j + 1 < this->playerBoard->C && j > 0);
+	return (this->irrelevantCells.find(make_pair(i, j)) == this->irrelevantCells.end() && i < this->playerBoard->R && i >= 0 && j < this->playerBoard->C && j >= 0);
 }
 
 
@@ -135,7 +135,19 @@ void BattleshipGameAlgoSmart::notifyOnAttackResult(int player, int row, int col,
 				if (this->target->edges[1] == make_pair(-1, -1))
 				{
 					this->target->edges[1] = make_pair(row, col);
-					this->target->direction = this->target->edges[0].first == this->target->edges[1].first;
+					this->target->direction = this->target->edges[0].second == this->target->edges[1].second;
+					
+					// add surrounding cells to irrelevantCells according to direction
+					if (this->target->direction == 0)
+					{
+						this->irrelevantCells.insert(make_pair(this->target->edges[0].first + 1, this->target->edges[0].second));
+						this->irrelevantCells.insert(make_pair(this->target->edges[0].first - 1, this->target->edges[0].second));
+					} else
+					{
+						this->irrelevantCells.insert(make_pair(this->target->edges[0].first, this->target->edges[0].second + 1));
+						this->irrelevantCells.insert(make_pair(this->target->edges[0].first, this->target->edges[0].second - 1));
+					}
+
 				} else
 				{
 					//if (this->target->edges[1].first == row - 1 || this->target->edges[1].first == row + 1 || this->target->edges[1].second == col - 1 || this->target->edges[1].second == col + 1)
@@ -143,6 +155,18 @@ void BattleshipGameAlgoSmart::notifyOnAttackResult(int player, int row, int col,
 						this->target->edges[1] = make_pair(row, col);
 					else
 						this->target->edges[0] = make_pair(row, col);
+				}
+
+				// add surrounding cells to irrelevantCells according to direction
+				if (this->target->direction == 0)
+				{
+					this->irrelevantCells.insert(make_pair(row + 1, col));
+					this->irrelevantCells.insert(make_pair(row - 1, col));
+				}
+				else
+				{
+					this->irrelevantCells.insert(make_pair(row, col + 1));
+					this->irrelevantCells.insert(make_pair(row, col - 1));
 				}
 			}
 			break;
