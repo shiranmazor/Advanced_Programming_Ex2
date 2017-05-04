@@ -46,6 +46,7 @@ bool BattleshipGameAlgoSmart::init(const std::string& path)
 
 std::pair<int, int> BattleshipGameAlgoSmart::attack()
 {
+	this->counter += 1;
 	if (this->target == nullptr)
 	{
 		// currently pretty naive, find better logic here
@@ -111,7 +112,7 @@ std::pair<int, int> BattleshipGameAlgoSmart::attack()
 
 void BattleshipGameAlgoSmart::notifyOnAttackResult(int player, int row, int col, AttackResult result)
 {
-	if (player != this->playerName)
+	if (player == this->playerName)
 	{
 		this->irrelevantCells.insert(make_pair(row, col));
 		switch (result) {
@@ -171,6 +172,12 @@ void BattleshipGameAlgoSmart::notifyOnAttackResult(int player, int row, int col,
 			}
 			break;
 		case AttackResult::Sink:
+			// add surrounding cells to irrelevantCells (last hit, can add all directions)
+			this->irrelevantCells.insert(make_pair(row + 1, col));
+			this->irrelevantCells.insert(make_pair(row - 1, col));
+			this->irrelevantCells.insert(make_pair(row, col + 1));
+			this->irrelevantCells.insert(make_pair(row, col - 1));
+
 			delete this->target;
 			this->target = nullptr; // back to target mode
 			this->hostileShipsNum -= 1;

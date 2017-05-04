@@ -25,6 +25,7 @@ public:
 	targetVessel* target = nullptr;
 	set<pair<int, int>> irrelevantCells;
 	int hostileShipsNum = -1;
+	int counter = 0;
 
 	// Blocking Copy and Assignment
 	BattleshipGameAlgoSmart(const BattleshipGameAlgoSmart&) = delete;
