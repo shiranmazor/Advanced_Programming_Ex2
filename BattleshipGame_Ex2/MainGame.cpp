@@ -289,11 +289,12 @@ int PlayGame(string path, vector<string> gameFiles,
 		// update board on consul 
 		if ((!isQuiet) && (moveRes != AttackResult::Miss))
 		{
-			ShowConsoleCursor(false);
 			char c = mainBoard->board[attackMove.first][attackMove.second];
+			int color = currentPlayer->playerName == A ? GREEN : RED;
+
+			ShowConsoleCursor(false);
 			HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 			gotoxy(attackMove.first, attackMove.second);
-			int color = currentPlayer->playerName == A ? GREEN : RED;
 			SetConsoleTextAttribute(hConsole, GREEN);
 			cout << color << c;
 			ShowConsoleCursor(true);
