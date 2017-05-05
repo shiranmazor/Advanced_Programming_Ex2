@@ -153,29 +153,30 @@ void closeDLLs(vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>> & dll_vec)
 }
 bool CheckValidPath(vector<string> gameFiles, string path)
 {
-	bool sboard = false;
-	if (gameFiles.size() == 3)
+	vector<string> error_messages;
+	if (gameFiles.size() == 3)// shortcut , but we also check for 3 dlls
 		return true;
 
-	//check which file is missing and print message
-	vector<string>::iterator fileIt;
-	for (fileIt = gameFiles.begin(); fileIt != gameFiles.end(); ++fileIt)
+
+	if (std::find_if(gameFiles.begin(), gameFiles.end(),
+		[](const std::string& str) { return str.find("sboard") == std::string::npos; }) != gameFiles.end())
 	{
-		if (fileIt->find("sboard") != std::string::npos)
-			sboard = true;
+		error_messages.push_back("Missing board file (*.sboard) looking in path:" + path);
+	}
+	if (std::find_if(gameFiles.begin(), gameFiles.end(),
+		[](const std::string& str) { return str.find("dll") == std::string::npos; }) != gameFiles.end())
+	{
+		error_messages.push_back("Missing an algorithm (dll) file looking in path:" + path);
 	}
 
-	if (!sboard)
+
+	if (error_messages.size() > 0)
 	{
-		std::cout << "Missing board file (*.sboard) looking in path:" + path << endl;
+		for (int i = 0; i < error_messages.size(); i++)
+			cout << error_messages[i] << endl;
+
 		return false;
 	}
-
-	//missing dll file
-	std::cout << "Missing an algorithm (dll) file looking in path:" + path << endl;
-	return false;
-
-
 
 }
 
@@ -185,6 +186,7 @@ int PlayGame(string path, vector<string> gameFiles,
 {
 	//create Ibattleship vector
 	vector<IBattleshipGameAlgo*> algo_vec;
+	Player onePlayerName;
 	bool victory = false;
 	int winPlayer = 2;
 	char** playerBoardA = NULL;
@@ -232,13 +234,15 @@ int PlayGame(string path, vector<string> gameFiles,
 		attackMove = currentPlayer->attack();
 		if (attackMove.first == -1 && attackMove.second == -1)
 		{
-			if (onePlayerGame)
+			if (onePlayerGame && onePlayerName == currentPlayer->playerName)
 			{
 				//exit while loop
 				break;
 			}
 			onePlayerGame = true;
+			
 			currentPlayer = swapPlayer(currentPlayer, playerA, playerB);
+			onePlayerName = currentPlayer->playerName;//update continue player name
 			continue;
 		}
 		AttackResult moveRes = mainBoard->performGameMove(currentPlayer->playerName, attackMove);
@@ -338,7 +342,6 @@ int main(int argc, char **argv)
 	getGameFiles(path, gameFiles);
 	if (!CheckValidPath(gameFiles, path))
 	{
-		std::cout << "Error game files are missing, Exiting game" << endl;
 		return -1;
 	}
 
