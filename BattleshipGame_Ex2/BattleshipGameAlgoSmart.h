@@ -20,7 +20,6 @@ public:
 class BattleshipGameAlgoSmart : public IBattleshipGameAlgo
 {
 public:
-	Player playerName;
 	BattleBoard* playerBoard = nullptr;
 	targetVessel* target = nullptr;
 	set<pair<int, int>> irrelevantCells;
@@ -32,7 +31,7 @@ public:
 	BattleshipGameAlgoSmart& operator = (const BattleshipGameAlgoSmart&) = delete;
 
 	//constructor
-	BattleshipGameAlgoSmart(): playerName()
+	BattleshipGameAlgoSmart()
 	{
 	}
 

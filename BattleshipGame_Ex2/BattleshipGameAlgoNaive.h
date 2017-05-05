@@ -15,7 +15,6 @@ class BattleshipGameAlgoNaive : public IBattleshipGameAlgo
 public:
 	BattleBoard* playerBoard = nullptr;
 	queue<pair<int,int>> attackQueue;
-
 	// Blocking Copy and Assignment
 	BattleshipGameAlgoNaive(const BattleshipGameAlgoNaive&) = delete;
 	BattleshipGameAlgoNaive& operator = (const BattleshipGameAlgoNaive&) = delete;

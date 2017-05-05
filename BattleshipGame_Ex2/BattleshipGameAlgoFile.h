@@ -18,12 +18,9 @@ using namespace std;
 class BattleshipGameAlgoFile : public IBattleshipGameAlgo
 {
 public:
-	
-	
 	BattleBoard* playerBoard = nullptr;
 	string attackFilePath;
 	queue<string> movesQueue;
-	
 
 	// Blocking Copy and Assignment
 	BattleshipGameAlgoFile(const BattleshipGameAlgoFile&) = delete;
