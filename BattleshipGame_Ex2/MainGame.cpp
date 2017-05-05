@@ -172,10 +172,8 @@ void gotoxy(int line, int column)
 	COORD coord;
 	coord.X = column;
 	coord.Y = line;
-	SetConsoleCursorPosition(
-		GetStdHandle(STD_OUTPUT_HANDLE),
-		coord
-	);
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleCursorPosition(hConsole, coord);
 }
 
 void setTextColor(int color)
@@ -238,6 +236,8 @@ int PlayGame(string path, vector<string> gameFiles,
 		std::cout << "Algorithm initialization failed for dll:" + fullFileName2 << endl;
 		return -1;
 	}
+
+	// init board on consul
 	if (!isQuiet)
 	{
 		HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -256,6 +256,7 @@ int PlayGame(string path, vector<string> gameFiles,
 		ShowConsoleCursor(true);
 		Sleep(delay);
 	}
+
 	pair<int, int> attackMove;
 	//we starts with player A
 	IBattleshipGameAlgo* currentPlayer = playerA;
@@ -285,6 +286,7 @@ int PlayGame(string path, vector<string> gameFiles,
 		}
 		AttackResult moveRes = mainBoard->performGameMove(currentPlayer->playerName, attackMove);
 
+		// update board on consul 
 		if ((!isQuiet) && (moveRes != AttackResult::Miss))
 		{
 			ShowConsoleCursor(false);
