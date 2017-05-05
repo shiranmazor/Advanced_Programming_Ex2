@@ -2,20 +2,7 @@
 #include <tuple>
 #include "BattleBoard.h"
 #include "BattleshipGameAlgoFile.h"
-
-void gotoxy(short col, short row)
-{
-	static HANDLE h = NULL;
-	if (!h)
-		h = GetStdHandle(STD_OUTPUT_HANDLE);
-	COORD c = { col, row };
-	SetConsoleCursorPosition(h, c);
-}
-void setTextColor(int color)
-{
-	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-	SetConsoleTextAttribute(hConsole, color);
-}
+#include <windows.h>
 
 
 /*
@@ -94,7 +81,7 @@ void getGameFiles(string folder, vector<string> & gameFiles)
 }
 
 bool loadAlgoDllFiles(string folder, vector<string> gameFiles
-	,vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>> & dll_vec)
+	, vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>> & dll_vec)
 {
 	GetAlgorithmFuncType getAlgorithmFunc1;
 	GetAlgorithmFuncType getAlgorithmFunc2;
@@ -106,7 +93,7 @@ bool loadAlgoDllFiles(string folder, vector<string> gameFiles
 	HINSTANCE hDll1 = LoadLibraryA(dll1_path.c_str()); // Notice: Unicode compatible version of LoadLibrary
 	if (!hDll1)
 	{
-		std::cout << "Cannot load dll"+ dll1_path << std::endl;
+		std::cout << "Cannot load dll" + dll1_path << std::endl;
 		return false;
 	}
 
@@ -180,8 +167,36 @@ bool CheckValidPath(vector<string> gameFiles, string path)
 
 }
 
+void gotoxy(int line, int column)
+{
+	COORD coord;
+	coord.X = column;
+	coord.Y = line;
+	SetConsoleCursorPosition(
+		GetStdHandle(STD_OUTPUT_HANDLE),
+		coord
+	);
+}
 
-int PlayGame(string path, vector<string> gameFiles, 
+void setTextColor(int color)
+{
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(hConsole, color);
+}
+
+void ShowConsoleCursor(bool showFlag)
+{
+	HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
+
+	CONSOLE_CURSOR_INFO     cursorInfo;
+
+	GetConsoleCursorInfo(out, &cursorInfo);
+	cursorInfo.bVisible = showFlag; // set the cursor visibility
+	SetConsoleCursorInfo(out, &cursorInfo);
+}
+
+
+int PlayGame(string path, vector<string> gameFiles,
 	vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>> dll_vec, bool isQuiet, int delay)
 {
 	//create Ibattleship vector
@@ -214,14 +229,32 @@ int PlayGame(string path, vector<string> gameFiles,
 	//call init
 	if (!playerA->init(path))
 	{
-		std::cout << "Algorithm initialization failed for dll:"+ fullFileName1 << endl;
+		std::cout << "Algorithm initialization failed for dll:" + fullFileName1 << endl;
 		return -1;
 	}
-		
+
 	if (!playerB->init(path))
 	{
 		std::cout << "Algorithm initialization failed for dll:" + fullFileName2 << endl;
 		return -1;
+	}
+	if (!isQuiet)
+	{
+		HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+		ShowConsoleCursor(false);
+		for (int i = 0; i < mainBoard->R; i++)
+		{
+			for (int j = 0; j < mainBoard->C; j++)
+			{
+				char c = mainBoard->board[i][j];
+				int color = WHITE;
+				if (isPlayer(c)) color = isupper(c) ? GREEN : RED;
+				SetConsoleTextAttribute(hConsole, color);
+				(j != mainBoard->C - 1) ? cout << color << c : cout << color << c << endl;
+			}
+		}
+		ShowConsoleCursor(true);
+		Sleep(delay);
 	}
 	pair<int, int> attackMove;
 	//we starts with player A
@@ -247,14 +280,22 @@ int PlayGame(string path, vector<string> gameFiles,
 			}
 			else
 				currentPlayer = swapPlayer(currentPlayer, playerA, playerB);
-			
+
 			continue;
 		}
 		AttackResult moveRes = mainBoard->performGameMove(currentPlayer->playerName, attackMove);
-		
-		if (!isQuiet)
+
+		if ((!isQuiet) && (moveRes != AttackResult::Miss))
 		{
-			//TODO: add board printing
+			ShowConsoleCursor(false);
+			char c = mainBoard->board[attackMove.first][attackMove.second];
+			HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+			gotoxy(attackMove.first, attackMove.second);
+			int color = currentPlayer->playerName == A ? GREEN : RED;
+			SetConsoleTextAttribute(hConsole, GREEN);
+			cout << color << c;
+			ShowConsoleCursor(true);
+			Sleep(delay);
 		}
 
 		//notify both players on the moveAttak results
