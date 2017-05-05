@@ -239,10 +239,15 @@ int PlayGame(string path, vector<string> gameFiles,
 				//exit while loop
 				break;
 			}
-			onePlayerGame = true;
+			else if (!onePlayerGame)
+			{
+				onePlayerGame = true;
+				currentPlayer = swapPlayer(currentPlayer, playerA, playerB);
+				onePlayerName = currentPlayer->playerName;
+			}
+			else
+				currentPlayer = swapPlayer(currentPlayer, playerA, playerB);
 			
-			currentPlayer = swapPlayer(currentPlayer, playerA, playerB);
-			onePlayerName = currentPlayer->playerName;//update continue player name
 			continue;
 		}
 		AttackResult moveRes = mainBoard->performGameMove(currentPlayer->playerName, attackMove);
