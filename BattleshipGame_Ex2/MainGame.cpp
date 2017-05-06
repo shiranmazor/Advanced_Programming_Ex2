@@ -245,6 +245,7 @@ int PlayGame(string path, vector<string> gameFiles, tuple<IBattleshipGameAlgo*, 
 	{
 		//set current player board
 		attackMove = currentPlayer->attack();
+		
 		if (attackMove.first == -1 && attackMove.second == -1)
 		{
 			if (onePlayerGame && onePlayerName == currentPlayer->playerName)
@@ -261,6 +262,11 @@ int PlayGame(string path, vector<string> gameFiles, tuple<IBattleshipGameAlgo*, 
 			else
 				currentPlayer = swapPlayer(currentPlayer, playerA, playerB);
 
+			continue;
+		}
+		else if (attackMove.first < 1 || attackMove.first > 10 || attackMove.second < 1 || attackMove.second > 10)//check attack valid range
+		{
+			//ignore bad attack move from other algorithms
 			continue;
 		}
 		AttackResult moveRes = mainBoard->performGameMove(currentPlayer->playerName, attackMove);
