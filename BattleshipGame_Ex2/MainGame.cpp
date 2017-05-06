@@ -78,7 +78,7 @@ void getGameFiles(string folder, vector<string> & gameFiles)
 }
 
 bool loadAlgoDllAndInitGame(string folder, vector<string> gameFiles , BattleBoard* mainBoard,
-	tuple<IBattleshipGameAlgo*, IBattleshipGameAlgo*>& players)
+	tuple<IBattleshipGameAlgo*, IBattleshipGameAlgo*>& players, vector<HINSTANCE>& dllLoaded)
 {
 	
 	GetAlgorithmFuncType getAlgorithmFunc1, getAlgorithmFunc2;
@@ -92,6 +92,7 @@ bool loadAlgoDllAndInitGame(string folder, vector<string> gameFiles , BattleBoar
 		std::cout << "Cannot load dll" + dll1_path << std::endl;
 		return false;
 	}
+	dllLoaded.push_back(hDll1);
 	// Get function pointer of dll 1
 	getAlgorithmFunc1 = (GetAlgorithmFuncType)GetProcAddress(hDll1, "GetAlgorithm");
 	if (!getAlgorithmFunc1)
@@ -119,7 +120,7 @@ bool loadAlgoDllAndInitGame(string folder, vector<string> gameFiles , BattleBoar
 		std::cout << "Cannot load dll" + dll2_path << std::endl;
 		return false;
 	}
-
+	dllLoaded.push_back(hDll2);
 	// Get function pointer of dll 2
 	getAlgorithmFunc2 = (GetAlgorithmFuncType)GetProcAddress(hDll2, "GetAlgorithm");
 	if (!getAlgorithmFunc2)
@@ -150,14 +151,11 @@ bool loadAlgoDllAndInitGame(string folder, vector<string> gameFiles , BattleBoar
 	return true;
 }
 
-void closeDLLs(vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>> & dll_vec)
+void closeDLLs(vector<HINSTANCE> dlls)
 {
-	vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>>::iterator vitr;
 	// close all the dynamic libs we opened
-	for (vitr = dll_vec.begin(); vitr != dll_vec.end(); ++vitr)
-	{
-		FreeLibrary(get<1>(*vitr));
-	}
+	for (int i=0; i< dlls.size(); i++)
+		FreeLibrary(dlls[i]);
 }
 bool CheckExistingDlls(vector<string> gameFiles, string path, vector<string>& error_messages)
 {
@@ -361,7 +359,10 @@ int main(int argc, char **argv)
 	//path is valid, continue
 	getGameFiles(path, gameFiles);
 	if (gameFiles.size() == 0 || (gameFiles.size() > 0 && gameFiles[0].find("sboard") == std::string::npos))
+	{
+		mainBoard = new BattleBoard();
 		error_messages.push_back("Missing board file (*.sboard) looking in path:" + path);
+	}
 		
 	else//sboard file exist
 	{
@@ -380,10 +381,11 @@ int main(int argc, char **argv)
 
 	//load dll algo
 	tuple<IBattleshipGameAlgo*, IBattleshipGameAlgo*> players;
-	if (!loadAlgoDllAndInitGame(path,gameFiles,mainBoard,players))
+	vector<HINSTANCE> dllLoaded;
+	if (!loadAlgoDllAndInitGame(path,gameFiles,mainBoard,players, dllLoaded))
 		return -1;
 	int ret = PlayGame(path, gameFiles, players, isQuiet, delay, mainBoard);
-	closeDLLs(dll_vec);
+	closeDLLs(dllLoaded);
 	return ret;
 
 }

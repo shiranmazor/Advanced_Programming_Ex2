@@ -56,6 +56,7 @@ public:
 	BattleBoard& operator = (const BattleBoard&) = delete;
 
 	// constructor
+	BattleBoard(){}
 	BattleBoard(string boardFilePath, int R = 10, int C = 10) :playerToolsNum(5)
 	{
 		ifstream boardFile(boardFilePath);
