@@ -13,8 +13,6 @@
 
 using namespace std;
 
-
-
 class BattleshipGameAlgoFile : public IBattleshipGameAlgo
 {
 public:

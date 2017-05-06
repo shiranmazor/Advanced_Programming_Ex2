@@ -327,7 +327,7 @@ int main(int argc, char **argv)
 {
 	string path; bool boardValid = true; bool dllExist = true;
 	vector<string> error_messages;
-	BattleBoard* mainBoard;
+	BattleBoard* mainBoard = NULL;
 	vector<string> gameFiles;
 	vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>>  dll_vec;
 	char the_path[256];
@@ -362,10 +362,7 @@ int main(int argc, char **argv)
 	//path is valid, continue
 	getGameFiles(path, gameFiles);
 	if (gameFiles.size() == 0 || (gameFiles.size() > 0 && gameFiles[0].find("sboard") == std::string::npos))
-	{
-		mainBoard = new BattleBoard();
 		error_messages.push_back("Missing board file (*.sboard) looking in path:" + path);
-	}
 		
 	else//sboard file exist
 	{
@@ -388,8 +385,10 @@ int main(int argc, char **argv)
 	if (!loadAlgoDllAndInitGame(path,gameFiles,mainBoard,players, dllLoaded))
 		return -1;
 	int ret = PlayGame(path, gameFiles, players, isQuiet, delay, mainBoard);
+	//free memory
 	closeDLLs(dllLoaded);
-	
+	if (mainBoard != NULL)
+		delete mainBoard;
 	return ret;
 
 }
