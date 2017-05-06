@@ -20,34 +20,41 @@ void BattleshipGameAlgoSmart::setBoard(int player, const char** board, int numRo
 	this->hostileShipsNum = this->playerBoard->playerToolsNum;
 }
 
-bool BattleshipGameAlgoSmart::_canAttack(int i, int j)
+bool BattleshipGameAlgoSmart::_canAttack(int i, int j) const
 {
-	return (this->irrelevantCells.find(make_pair(i, j)) == this->irrelevantCells.end() && i < this->playerBoard->R && i >= 0 && j < this->playerBoard->C && j >= 0);
+	return (i >= 0 && i < this->playerBoard->R && j >= 0 && j < this->playerBoard->C && this->playerBoard->board[i][j] == ' ');
 }
 
+void BattleshipGameAlgoSmart::_markIrrelevant(int i, int j)
+{
+	if (i >= 0 && i < this->playerBoard->R && j >= 0 && j < this->playerBoard->C)
+		this->playerBoard->board[i][j] = irrelevnatCell;
+}
 
 bool BattleshipGameAlgoSmart::init(const std::string& path)
 {
+	set<pair<int, int>> irrelevantCells;
 	for (int i = 0; i < this->playerBoard->R; i++)
 	{
 		for (int j = 0; j < this->playerBoard->C; j++)
 		{
+
 			if (this->playerBoard->board[i][j] != ' ') {
-				this->irrelevantCells.insert(make_pair(i, j));
-				if (i + 1 < this->playerBoard->R) this->irrelevantCells.insert(make_pair(i + 1, j));
-				if (i > 0) this->irrelevantCells.insert(make_pair(i - 1, j));
-				if (j + 1 < this->playerBoard->C) this->irrelevantCells.insert(make_pair(i, j + 1));
-				if (j > 0) this->irrelevantCells.insert(make_pair(i, j - 1));
+				if (i + 1 < this->playerBoard->R && this->playerBoard->board[i + 1][j] == ' ') irrelevantCells.insert(make_pair(i + 1, j));
+				if (i > 0 && this->playerBoard->board[i - 1][j] == ' ') irrelevantCells.insert(make_pair(i - 1, j));
+				if (j + 1 < this->playerBoard->C && this->playerBoard->board[i][j + 1] == ' ') irrelevantCells.insert(make_pair(i, j + 1));
+				if (j > 0 && this->playerBoard->board[i][j - 1] == ' ') irrelevantCells.insert(make_pair(i, j - 1));
 			}
 		}
 	}
+	for (auto const& cell : irrelevantCells)
+		this->_markIrrelevant(cell.first, cell.second);
 	return true;
 }
 
 
 std::pair<int, int> BattleshipGameAlgoSmart::attack()
 {
-	this->counter += 1;
 	if (this->target == nullptr)
 	{
 		// currently pretty naive, find better logic here
@@ -117,7 +124,7 @@ void BattleshipGameAlgoSmart::notifyOnAttackResult(int player, int row, int col,
 	col--;
 	if (player == this->playerName)
 	{
-		this->irrelevantCells.insert(make_pair(row, col));
+		this->_markIrrelevant(row, col);
 		switch (result) {
 		case AttackResult::Miss:
 			if (this->target != nullptr)
@@ -141,45 +148,44 @@ void BattleshipGameAlgoSmart::notifyOnAttackResult(int player, int row, int col,
 					this->target->edges[1] = make_pair(row, col);
 					this->target->direction = this->target->edges[0].second == this->target->edges[1].second;
 					
-					// add surrounding cells to irrelevantCells according to direction
+					// add edge[0]'s surrounding cells to irrelevantCells according to direction
 					if (this->target->direction == 0)
 					{
-						this->irrelevantCells.insert(make_pair(this->target->edges[0].first + 1, this->target->edges[0].second));
-						this->irrelevantCells.insert(make_pair(this->target->edges[0].first - 1, this->target->edges[0].second));
+						this->_markIrrelevant(this->target->edges[0].first + 1, this->target->edges[0].second);
+						this->_markIrrelevant(this->target->edges[0].first - 1, this->target->edges[0].second);
 					} else
 					{
-						this->irrelevantCells.insert(make_pair(this->target->edges[0].first, this->target->edges[0].second + 1));
-						this->irrelevantCells.insert(make_pair(this->target->edges[0].first, this->target->edges[0].second - 1));
+						this->_markIrrelevant(this->target->edges[0].first, this->target->edges[0].second + 1);
+						this->_markIrrelevant(this->target->edges[0].first, this->target->edges[0].second - 1);
 					}
 
 				} else
 				{
-					//if (this->target->edges[1].first == row - 1 || this->target->edges[1].first == row + 1 || this->target->edges[1].second == col - 1 || this->target->edges[1].second == col + 1)
 					if (abs(this->target->edges[1].first - row) + abs(this->target->edges[1].second - col) == 1) // one cell away from edge[1]
 						this->target->edges[1] = make_pair(row, col);
 					else
 						this->target->edges[0] = make_pair(row, col);
 				}
 
-				// add surrounding cells to irrelevantCells according to direction
+				// add current cell's surrounding cells to irrelevantCells according to direction
 				if (this->target->direction == 0)
 				{
-					this->irrelevantCells.insert(make_pair(row + 1, col));
-					this->irrelevantCells.insert(make_pair(row - 1, col));
+					this->_markIrrelevant(row + 1, col);
+					this->_markIrrelevant(row - 1, col);
 				}
 				else
 				{
-					this->irrelevantCells.insert(make_pair(row, col + 1));
-					this->irrelevantCells.insert(make_pair(row, col - 1));
+					this->_markIrrelevant(row, col + 1);
+					this->_markIrrelevant(row, col - 1);
 				}
 			}
 			break;
 		case AttackResult::Sink:
 			// add surrounding cells to irrelevantCells (last hit, can add all directions)
-			this->irrelevantCells.insert(make_pair(row + 1, col));
-			this->irrelevantCells.insert(make_pair(row - 1, col));
-			this->irrelevantCells.insert(make_pair(row, col + 1));
-			this->irrelevantCells.insert(make_pair(row, col - 1));
+			this->_markIrrelevant(row + 1, col);
+			this->_markIrrelevant(row - 1, col);
+			this->_markIrrelevant(row, col + 1);
+			this->_markIrrelevant(row, col - 1);
 
 			delete this->target;
 			this->target = nullptr; // back to target mode

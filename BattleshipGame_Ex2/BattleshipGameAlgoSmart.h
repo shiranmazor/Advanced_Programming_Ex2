@@ -7,6 +7,8 @@
 #include "BattleBoard.h"
 #include "Common.h"
 
+#define irrelevnatCell '-'
+
 using namespace std;
 
 class targetVessel
@@ -22,9 +24,7 @@ class BattleshipGameAlgoSmart : public IBattleshipGameAlgo
 public:
 	BattleBoard* playerBoard = nullptr;
 	targetVessel* target = nullptr;
-	set<pair<int, int>> irrelevantCells;
 	int hostileShipsNum = -1;
-	int counter = 0;
 
 	// Blocking Copy and Assignment
 	BattleshipGameAlgoSmart(const BattleshipGameAlgoSmart&) = delete;
@@ -49,5 +49,6 @@ public:
 	virtual void notifyOnAttackResult(int player, int row, int col, AttackResult result) override;
 
 private:
-	bool _canAttack(int i, int j);
+	void _markIrrelevant(int i, int j);
+	bool _canAttack(int i, int j) const;
 };
