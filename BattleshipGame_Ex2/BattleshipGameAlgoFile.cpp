@@ -130,14 +130,16 @@ std::pair<int, int> BattleshipGameAlgoFile::attack()
 	line = removeSpaces(line);
 	vector<string> splitLine = splitString(line, ',');
 	//splitLine has 2 items
-	attackMove.first = stoi(splitLine[0]) - 1;
-	attackMove.second = stoi(splitLine[1]) - 1;
+	attackMove.first = stoi(splitLine[0]);
+	attackMove.second = stoi(splitLine[1]);
 
 	return attackMove;
 }
 
 void BattleshipGameAlgoFile::notifyOnAttackResult(int player, int row, int col, AttackResult result)
 {
+	row--;
+	col--;
 	char c = this->playerBoard->board[row][col];
 	bool isOppVessel = (islower(c) && this->playerName == A) || (isupper(c) && this->playerName == B);
 	switch (result) {
@@ -148,10 +150,10 @@ void BattleshipGameAlgoFile::notifyOnAttackResult(int player, int row, int col, 
 		this->playerBoard->board[row][col] = isOppVessel ? OpHitMark : MyHitMark;
 		break;
 	case AttackResult::Sink:
-		this->playerBoard->board[row][col] = isOppVessel ? OpSinkMark : MySinkMark; //TODO: mark all the other hits as sink as well
+		this->playerBoard->board[row][col] = isOppVessel ? OpSinkMark : MySinkMark; 
 		break;
 	default:
-		//TODO: print err (unknown attackres)
+		cout << "Error on BattleshipGameAlgoFile::notifyOnAttackResult unknown attack result" << endl;
 		break;
 	}
 }

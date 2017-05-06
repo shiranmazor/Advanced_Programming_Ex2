@@ -126,7 +126,7 @@ public:
 		}
 	}
 
-	bool isBoardValid();
+	bool isBoardValid(vector<string>& error_messages);
 	pair<int, int> CalcScore();
 	int CheckVictory();
 	void getPlayerBoard(Player player, char** &pBoard);
