@@ -79,10 +79,10 @@ void BattleshipGameAlgoNaive::notifyOnAttackResult(int player, int row, int col,
 		this->playerBoard->board[row][col] = isOppVessel ? OpHitMark : MyHitMark;
 		break;
 	case AttackResult::Sink:
-		this->playerBoard->board[row][col] = isOppVessel ? OpSinkMark : MySinkMark; //TODO: mark all the other hits as sink as well
+		this->playerBoard->board[row][col] = isOppVessel ? OpSinkMark : MySinkMark;
 		break;
 	default:
-		//TODO: print err (unknown attackres)
+		cout << "BattleshipGameAlgoNaive.notifyOnAttackResult: Something went wrong, got bad AttackResult" << endl;
 		break;
 	}
 }

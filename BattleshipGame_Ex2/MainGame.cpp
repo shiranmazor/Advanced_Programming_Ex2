@@ -251,6 +251,7 @@ int PlayGame(string path, vector<string> gameFiles, tuple<IBattleshipGameAlgo*, 
 	{
 		//set current player board
 		attackMove = currentPlayer->attack();
+		
 		if (attackMove.first == -1 && attackMove.second == -1)
 		{
 			if (onePlayerGame && onePlayerName == currentPlayer->playerName)
@@ -267,6 +268,11 @@ int PlayGame(string path, vector<string> gameFiles, tuple<IBattleshipGameAlgo*, 
 			else
 				currentPlayer = swapPlayer(currentPlayer, playerA, playerB);
 
+			continue;
+		}
+		else if (attackMove.first < 1 || attackMove.first > 10 || attackMove.second < 1 || attackMove.second > 10)//check attack valid range
+		{
+			//ignore bad attack move from other algorithms
 			continue;
 		}
 		AttackResult moveRes = mainBoard->performGameMove(currentPlayer->playerName, attackMove);
@@ -328,6 +334,9 @@ int PlayGame(string path, vector<string> gameFiles, tuple<IBattleshipGameAlgo*, 
 	std::cout << "Player A: " << gameScore.first << endl;
 	std::cout << "Player B: " << gameScore.second << endl;
 
+	//free memory
+	delete get<0>(players);
+	delete get<1>(players);
 	return 0;
 }
 
@@ -335,7 +344,7 @@ int main(int argc, char **argv)
 {
 	string path; bool boardValid = true; bool dllExist = true;
 	vector<string> error_messages;
-	BattleBoard* mainBoard;
+	BattleBoard* mainBoard = NULL;
 	vector<string> gameFiles;
 	vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>>  dll_vec;
 	char the_path[256];
@@ -370,10 +379,7 @@ int main(int argc, char **argv)
 	//path is valid, continue
 	getGameFiles(path, gameFiles);
 	if (gameFiles.size() == 0 || (gameFiles.size() > 0 && gameFiles[0].find("sboard") == std::string::npos))
-	{
-		mainBoard = new BattleBoard();
 		error_messages.push_back("Missing board file (*.sboard) looking in path:" + path);
-	}
 		
 	else//sboard file exist
 	{
@@ -396,8 +402,10 @@ int main(int argc, char **argv)
 	if (!loadAlgoDllAndInitGame(path,gameFiles,mainBoard,players, dllLoaded))
 		return -1;
 	int ret = PlayGame(path, gameFiles, players, isQuiet, delay, mainBoard);
-	closeDLLs(dllLoaded);
 	
+	closeDLLs(dllLoaded);
+	if (mainBoard != NULL)
+		delete mainBoard;
 	return ret;
 
 }
