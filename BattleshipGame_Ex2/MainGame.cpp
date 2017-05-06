@@ -270,7 +270,7 @@ int PlayGame(string path, vector<string> gameFiles, tuple<IBattleshipGameAlgo*, 
 			HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 			gotoxy(attackMove.first, attackMove.second);
 			SetConsoleTextAttribute(hConsole, GREEN);
-			cout << color << c;
+			cout << c;
 			ShowConsoleCursor(true);
 			Sleep(delay);
 		}
