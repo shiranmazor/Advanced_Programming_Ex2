@@ -320,6 +320,9 @@ int PlayGame(string path, vector<string> gameFiles, tuple<IBattleshipGameAlgo*, 
 	std::cout << "Player A: " << gameScore.first << endl;
 	std::cout << "Player B: " << gameScore.second << endl;
 
+	//free memory
+	delete get<0>(players);
+	delete get<1>(players);
 	return 0;
 }
 
@@ -385,7 +388,7 @@ int main(int argc, char **argv)
 	if (!loadAlgoDllAndInitGame(path,gameFiles,mainBoard,players, dllLoaded))
 		return -1;
 	int ret = PlayGame(path, gameFiles, players, isQuiet, delay, mainBoard);
-	//free memory
+	
 	closeDLLs(dllLoaded);
 	if (mainBoard != NULL)
 		delete mainBoard;

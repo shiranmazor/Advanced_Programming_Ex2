@@ -119,8 +119,10 @@ public:
 		if (this->board != NULL)
 		{
 			set<Vessel*> vessles;
-			delete[] this->board;
-
+			for (int i = 0; i < this->R; i++)
+			{
+				delete[] this->board[i];
+			}
 			for (auto const& element : this->ships)
 				vessles.insert(element.second);
 			for (auto const& element : vessles)
