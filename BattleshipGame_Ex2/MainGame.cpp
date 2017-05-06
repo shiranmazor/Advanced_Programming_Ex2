@@ -347,7 +347,10 @@ int main(int argc, char **argv)
 	//path is valid, continue
 	getGameFiles(path, gameFiles);
 	if (gameFiles.size() == 0 || (gameFiles.size() > 0 && gameFiles[0].find("sboard") == std::string::npos))
+	{
+		mainBoard = new BattleBoard();
 		error_messages.push_back("Missing board file (*.sboard) looking in path:" + path);
+	}
 		
 	else//sboard file exist
 	{
