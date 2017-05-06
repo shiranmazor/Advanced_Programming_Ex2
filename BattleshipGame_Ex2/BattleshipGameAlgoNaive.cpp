@@ -46,7 +46,7 @@ bool BattleshipGameAlgoNaive::init(const std::string& path)
 			if (this->playerBoard->board[i][j] != ' ') continue;
 			if (_canAttack(this->playerBoard, i, j))
 			{
-				attackQueue.push(std::make_pair(i, j));
+				attackQueue.push(_make_pair(i, j));
 			}
 		}
 	}
@@ -67,6 +67,8 @@ std::pair<int, int> BattleshipGameAlgoNaive::attack()
 
 void BattleshipGameAlgoNaive::notifyOnAttackResult(int player, int row, int col, AttackResult result)
 {
+	row--;
+	col--;
 	char c = this->playerBoard->board[row][col];
 	bool isOppVessel = (islower(c) && this->playerName == A) || (isupper(c) && this->playerName == B);
 	switch (result) {

@@ -2,7 +2,6 @@
 #include <utility>
 #include "BattleshipGameAlgoSmart.h"
 
-#define _make_pair(x, y) make_pair(x + 1, y + 1)
 
 IBattleshipGameAlgo* GetAlgorithm()
 {
@@ -114,8 +113,8 @@ std::pair<int, int> BattleshipGameAlgoSmart::attack()
 
 void BattleshipGameAlgoSmart::notifyOnAttackResult(int player, int row, int col, AttackResult result)
 {
-	row -= 1;
-	col -= 1;
+	row--;
+	col--;
 	if (player == this->playerName)
 	{
 		this->irrelevantCells.insert(make_pair(row, col));
@@ -193,5 +192,4 @@ void BattleshipGameAlgoSmart::notifyOnAttackResult(int player, int row, int col,
 		}
 	}
 }
-
 

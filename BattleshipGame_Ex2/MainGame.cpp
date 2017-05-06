@@ -1,7 +1,6 @@
 #include "Game.h"
 
 
-
 /*
 * get current working directory path
 */
@@ -384,6 +383,7 @@ int main(int argc, char **argv)
 		return -1;
 	int ret = PlayGame(path, gameFiles, players, isQuiet, delay, mainBoard);
 	closeDLLs(dllLoaded);
+	
 	return ret;
 
 }
