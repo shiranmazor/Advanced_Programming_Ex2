@@ -39,10 +39,9 @@ bool CheckExistingDlls(vector<string> gameFiles, string path, vector<string>& er
  * read needed game files from the directory and feel the gameFiles vector with the files path.
  * sboard file + 2 dll files
  */
-int PlayGame(string path, vector<string> gameFiles,
-	vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>> dll_vec, bool isQuiet, int delay, BattleBoard* mainBoard);
-bool loadAlgoDllFiles(string folder, vector<string> gameFiles
-	, vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>> & dll_vec);
+int PlayGame(string path, vector<string> gameFiles,tuple<IBattleshipGameAlgo*, IBattleshipGameAlgo*>& players, bool isQuiet, int delay, BattleBoard* mainBoard);
+bool loadAlgoDllAndInitGame(string folder, vector<string> gameFiles, BattleBoard* mainBoard,
+	tuple<IBattleshipGameAlgo*, IBattleshipGameAlgo*>& players);
 void closeDLLs(vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>> & dll_vec);
 bool dirExists(const std::string& dirName_in);
 void gotoxy(short col, short row); //added for future using

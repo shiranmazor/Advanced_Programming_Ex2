@@ -77,15 +77,14 @@ void getGameFiles(string folder, vector<string> & gameFiles)
 	}
 }
 
-bool loadAlgoDllFiles(string folder, vector<string> gameFiles
-	, vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>> & dll_vec)
+bool loadAlgoDllAndInitGame(string folder, vector<string> gameFiles , BattleBoard* mainBoard,
+	tuple<IBattleshipGameAlgo*, IBattleshipGameAlgo*>& players)
 {
-	GetAlgorithmFuncType getAlgorithmFunc1;
-	GetAlgorithmFuncType getAlgorithmFunc2;
+	
+	GetAlgorithmFuncType getAlgorithmFunc1, getAlgorithmFunc2;
+	char** playerBoardA = NULL; char** playerBoardB = NULL;
 	string dll1_path = gameFiles[1];
-	string algoName1 = dll1_path;
 	string dll2_path = gameFiles[2];
-	string algoName2 = dll2_path;
 	// Load dynamic library 1
 	HINSTANCE hDll1 = LoadLibraryA(dll1_path.c_str()); // Notice: Unicode compatible version of LoadLibrary
 	if (!hDll1)
@@ -93,18 +92,28 @@ bool loadAlgoDllFiles(string folder, vector<string> gameFiles
 		std::cout << "Cannot load dll" + dll1_path << std::endl;
 		return false;
 	}
-
 	// Get function pointer of dll 1
 	getAlgorithmFunc1 = (GetAlgorithmFuncType)GetProcAddress(hDll1, "GetAlgorithm");
 	if (!getAlgorithmFunc1)
 	{
-		std::cout << "could not load function GetShape()" << std::endl;
+		std::cout << "Cannot load dll" + dll1_path << std::endl;
 		return false;
 	}
-	dll_vec.push_back(make_tuple(algoName1, hDll1, getAlgorithmFunc1));
-
-	// Load dynamic library 1
-	HINSTANCE hDll2 = LoadLibraryA(dll2_path.c_str()); // Notice: Unicode compatible version of LoadLibrary
+	//now let's perform setboard and init as the instruction ordered:
+	IBattleshipGameAlgo* playerA = getAlgorithmFunc1();
+	mainBoard->getPlayerBoard(A, playerBoardA);
+	playerA->setBoard(0, const_cast<const char**>(playerBoardA), mainBoard->R, mainBoard->C);
+	//call init
+	if (!playerA->init(folder))
+	{
+		std::cout << "Algorithm initialization failed for dll:" + dll1_path << endl;
+		if (playerBoardA != NULL)
+			delete[] playerBoardA;
+		return false;
+	}
+	
+	// Load dynamic library 2
+	HINSTANCE hDll2 = LoadLibraryA(dll2_path.c_str()); 
 	if (!hDll2)
 	{
 		std::cout << "Cannot load dll" + dll2_path << std::endl;
@@ -115,15 +124,30 @@ bool loadAlgoDllFiles(string folder, vector<string> gameFiles
 	getAlgorithmFunc2 = (GetAlgorithmFuncType)GetProcAddress(hDll2, "GetAlgorithm");
 	if (!getAlgorithmFunc2)
 	{
-		std::cout << "could not load function GetShape()" << std::endl;
+		std::cout << "Cannot load dll" + dll1_path << std::endl;
 		return false;
 	}
-	dll_vec.push_back(make_tuple(algoName2, hDll2, getAlgorithmFunc2));
-
-	if (dll_vec.size() == 2)
-		return true;
-	else
+	//now let's perform setboard and init for playerB as the instruction ordered:
+	IBattleshipGameAlgo* playerB = getAlgorithmFunc2();
+	mainBoard->getPlayerBoard(B, playerBoardB);
+	playerB->setBoard(1, const_cast<const char**>(playerBoardB), mainBoard->R, mainBoard->C);
+	//call init
+	if (!playerB->init(folder))
+	{
+		std::cout << "Algorithm initialization failed for dll:" + dll2_path << endl;
+		if (playerBoardB != NULL)
+			delete[] playerBoardB;
+		if (playerBoardA != NULL)
+			delete[] playerBoardA;
 		return false;
+	}
+	players = make_tuple(playerA, playerB);
+	//outside loop, avoid memory leak
+	if (playerBoardA != NULL)
+		delete[] playerBoardA;
+	if (playerBoardB != NULL)
+		delete[] playerBoardB;
+	return true;
 }
 
 void closeDLLs(vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>> & dll_vec)
@@ -179,44 +203,15 @@ void ShowConsoleCursor(bool showFlag)
 }
 
 
-int PlayGame(string path, vector<string> gameFiles,
-	vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>> dll_vec, bool isQuiet, int delay, BattleBoard* mainBoard)
+int PlayGame(string path, vector<string> gameFiles, tuple<IBattleshipGameAlgo*, IBattleshipGameAlgo*>& players, 
+	bool isQuiet, int delay, BattleBoard* mainBoard)
 {
-	//create Ibattleship vector
-	vector<IBattleshipGameAlgo*> algo_vec;
-	Player onePlayerName;
-	bool victory = false;
-	int winPlayer = 2;
-	char** playerBoardA = NULL;
-	char** playerBoardB = NULL;
-
-	//add algorithms to algo_vec vector
-	algo_vec.push_back(get<2>(dll_vec[0])());
-	algo_vec.push_back(get<2>(dll_vec[1])());
-
+	Player onePlayerName; bool victory = false; int winPlayer = 2;
 	//create players object
-	IBattleshipGameAlgo* playerA = (algo_vec[0]);
-	IBattleshipGameAlgo* playerB = (algo_vec[1]);
-	mainBoard->getPlayerBoard(A, playerBoardA);
-	mainBoard->getPlayerBoard(B, playerBoardB);
-	playerA->setBoard(0, const_cast<const char**>(playerBoardA), mainBoard->R, mainBoard->C);
-	playerB->setBoard(1, const_cast<const char**>(playerBoardB), mainBoard->R, mainBoard->C);
-	string fullFileName1 = get<0>(dll_vec[0]);
-	string fullFileName2 = get<0>(dll_vec[1]);
-	//call init
-	if (!playerA->init(path))
-	{
-		std::cout << "Algorithm initialization failed for dll:" + fullFileName1 << endl;
-		return -1;
-	}
+	IBattleshipGameAlgo* playerA = get<0>(players);
+	IBattleshipGameAlgo* playerB = get<1>(players);
 
-	if (!playerB->init(path))
-	{
-		std::cout << "Algorithm initialization failed for dll:" + fullFileName2 << endl;
-		return -1;
-	}
-
-	// init board on consul
+	// init board on console
 	if (!isQuiet)
 	{
 		HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -312,11 +307,6 @@ int PlayGame(string path, vector<string> gameFiles,
 	std::cout << "Player A: " << gameScore.first << endl;
 	std::cout << "Player B: " << gameScore.second << endl;
 
-	//outside loop, avoid memory leak
-	if (playerBoardA != NULL)
-		delete[] playerBoardA;
-	if (playerBoardB != NULL)
-		delete[] playerBoardB;
 	return 0;
 }
 
@@ -358,9 +348,9 @@ int main(int argc, char **argv)
 	}
 	//path is valid, continue
 	getGameFiles(path, gameFiles);
-	if (std::find_if(gameFiles.begin(), gameFiles.end(),
-		[](const std::string& str) { return str.find("sboard") == std::string::npos; }) != gameFiles.end())
+	if (gameFiles.size() == 0 || (gameFiles.size() > 0 && gameFiles[0].find("sboard") == std::string::npos))
 		error_messages.push_back("Missing board file (*.sboard) looking in path:" + path);
+		
 	else//sboard file exist
 	{
 		mainBoard = new BattleBoard(gameFiles[0]);
@@ -377,9 +367,10 @@ int main(int argc, char **argv)
 	}
 
 	//load dll algo
-	if (!loadAlgoDllFiles(path, gameFiles, dll_vec))
+	tuple<IBattleshipGameAlgo*, IBattleshipGameAlgo*> players;
+	if (!loadAlgoDllAndInitGame(path,gameFiles,mainBoard,players))
 		return -1;
-	int ret = PlayGame(path, gameFiles, dll_vec, isQuiet, delay, mainBoard);
+	int ret = PlayGame(path, gameFiles, players, isQuiet, delay, mainBoard);
 	closeDLLs(dll_vec);
 	return ret;
 
