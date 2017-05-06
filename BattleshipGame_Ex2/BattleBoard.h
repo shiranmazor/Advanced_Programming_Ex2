@@ -8,6 +8,9 @@
 #include "IBattleshipGameAlgo.h"
 #include <string.h>
 #include <set>
+#include <iostream>
+#include <ppltasks.h>
+
 using namespace std;
 
 #define isPlayerChar(x, y) (x==A && (isupper(y) || isspace(y)) || (x==B && (islower(y) || isspace(y))))
@@ -68,7 +71,7 @@ public:
 
 		if (boardFile.fail())
 		{
-			cout << "Missing board file (*.sboard) looking in path: " << boardFilePath << endl;
+			std::cout << "Missing board file (*.sboard) looking in path: " << boardFilePath << endl;
 			boardFile.close();
 		}
 
