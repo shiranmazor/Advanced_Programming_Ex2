@@ -1,8 +1,5 @@
 #include "Game.h"
-#include <tuple>
-#include "BattleBoard.h"
-#include "BattleshipGameAlgoFile.h"
-#include <windows.h>
+
 
 
 /*
@@ -138,33 +135,21 @@ void closeDLLs(vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>> & dll_vec)
 		FreeLibrary(get<1>(*vitr));
 	}
 }
-bool CheckValidPath(vector<string> gameFiles, string path)
+bool CheckExistingDlls(vector<string> gameFiles, string path, vector<string>& error_messages)
 {
-	vector<string> error_messages;
-	if (gameFiles.size() == 3)// shortcut , but we also check for 3 dlls
-		return true;
+	int dllCounter = 0;
 
-
-	if (std::find_if(gameFiles.begin(), gameFiles.end(),
-		[](const std::string& str) { return str.find("sboard") == std::string::npos; }) != gameFiles.end())
+	for (int i = 0; i < gameFiles.size(); i++)
 	{
-		error_messages.push_back("Missing board file (*.sboard) looking in path:" + path);
+		if (gameFiles[i].find("dll") != std::string::npos)
+			dllCounter++;
 	}
-	if (std::find_if(gameFiles.begin(), gameFiles.end(),
-		[](const std::string& str) { return str.find("dll") == std::string::npos; }) != gameFiles.end())
+	if (dllCounter < 2)//need at least 2 dlls!!
 	{
 		error_messages.push_back("Missing an algorithm (dll) file looking in path:" + path);
-	}
-
-
-	if (error_messages.size() > 0)
-	{
-		for (int i = 0; i < error_messages.size(); i++)
-			cout << error_messages[i] << endl;
-
 		return false;
 	}
-
+	return true;
 }
 
 void gotoxy(int line, int column)
@@ -195,7 +180,7 @@ void ShowConsoleCursor(bool showFlag)
 
 
 int PlayGame(string path, vector<string> gameFiles,
-	vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>> dll_vec, bool isQuiet, int delay)
+	vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>> dll_vec, bool isQuiet, int delay, BattleBoard* mainBoard)
 {
 	//create Ibattleship vector
 	vector<IBattleshipGameAlgo*> algo_vec;
@@ -204,13 +189,7 @@ int PlayGame(string path, vector<string> gameFiles,
 	int winPlayer = 2;
 	char** playerBoardA = NULL;
 	char** playerBoardB = NULL;
-	BattleBoard* mainBoard = new BattleBoard(gameFiles[0]);
-	//check board is valid and initialize board ships
-	if (!mainBoard->isBoardValid())
-	{
-		//  invalid board
-		return -1;
-	}
+
 	//add algorithms to algo_vec vector
 	algo_vec.push_back(get<2>(dll_vec[0])());
 	algo_vec.push_back(get<2>(dll_vec[1])());
@@ -338,19 +317,14 @@ int PlayGame(string path, vector<string> gameFiles,
 		delete[] playerBoardA;
 	if (playerBoardB != NULL)
 		delete[] playerBoardB;
-
-	//delete objects
-	//delete playerA;
-	//delete playerB;
-	delete mainBoard;
 	return 0;
 }
 
-
-
 int main(int argc, char **argv)
 {
-	string path;
+	string path; bool boardValid = true; bool dllExist = true;
+	vector<string> error_messages;
+	BattleBoard* mainBoard;
 	vector<string> gameFiles;
 	vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>>  dll_vec;
 	char the_path[256];
@@ -360,7 +334,6 @@ int main(int argc, char **argv)
 	path = std::string(the_path);
 	bool isQuiet = false;
 	int delay = 100;
-
 	// parse command line parameters
 	int i = 0;
 	while (i < argc)
@@ -378,26 +351,35 @@ int main(int argc, char **argv)
 		}
 		i++;
 	}
-
-
 	if (!dirExists(path))
 	{
 		std::cout << "Wrong path:" + path << endl;
 		return -1;
 	}
-
-
 	//path is valid, continue
 	getGameFiles(path, gameFiles);
-	if (!CheckValidPath(gameFiles, path))
+	if (std::find_if(gameFiles.begin(), gameFiles.end(),
+		[](const std::string& str) { return str.find("sboard") == std::string::npos; }) != gameFiles.end())
+		error_messages.push_back("Missing board file (*.sboard) looking in path:" + path);
+	else//sboard file exist
 	{
+		mainBoard = new BattleBoard(gameFiles[0]);
+		if (!mainBoard->isBoardValid(error_messages))//check board is valid and initialize board ships, output error messages like in ex1
+			boardValid = false;
+	}
+	dllExist = CheckExistingDlls(gameFiles, path, error_messages);
+	if (!dllExist || !boardValid || error_messages.size() > 0)//errors number 2
+	{
+		//output error messages
+		for (int i = 0; i < error_messages.size(); i++)
+			cout << error_messages[i] << endl;
 		return -1;
 	}
 
 	//load dll algo
 	if (!loadAlgoDllFiles(path, gameFiles, dll_vec))
 		return -1;
-	int ret = PlayGame(path, gameFiles, dll_vec, isQuiet, delay);
+	int ret = PlayGame(path, gameFiles, dll_vec, isQuiet, delay, mainBoard);
 	closeDLLs(dll_vec);
 	return ret;
 
