@@ -25,7 +25,7 @@ bool BattleshipGameAlgoSmart::_canAttack(int i, int j) const
 	return (i >= 0 && i < this->playerBoard->R && j >= 0 && j < this->playerBoard->C && this->playerBoard->board[i][j] == ' ');
 }
 
-void BattleshipGameAlgoSmart::_markIrrelevant(int i, int j)
+void BattleshipGameAlgoSmart::_markIrrelevant(int i, int j) const
 {
 	if (i >= 0 && i < this->playerBoard->R && j >= 0 && j < this->playerBoard->C)
 		this->playerBoard->board[i][j] = irrelevnatCell;
@@ -52,15 +52,64 @@ bool BattleshipGameAlgoSmart::init(const std::string& path)
 	return true;
 }
 
+pair<int, int> BattleshipGameAlgoSmart::_getBestGuess() const
+{
+	int** scoreBoard = new int*[this->playerBoard->R];
+	bool goodI, goodJ;
+	pair<int, int> bestCell;
+	int bestScore = -1;
+
+	for (int i = 0; i < this->playerBoard->R; i++)
+	{
+		scoreBoard[i] = new int[this->playerBoard->C];
+		for (int j = 0; j < this->playerBoard->C; j++) scoreBoard[i][j] = 0;
+	}
+
+	for (char ship : shipsBySize)
+		for (int i = 0; i < this->playerBoard->R; i++)
+			for (int j = 0; j < this->playerBoard->C; j++)
+				if (this->_canAttack(i, j))
+				{
+					goodI = true;
+					goodJ = true;
+					for (int l = 1; l < getShipSize(ship); l++)
+					{
+						if (!this->_canAttack(i + l, j)) goodI = false;
+						if (!this->_canAttack(i, j + l)) goodJ = false;
+					}
+					for (int l = 0; l < getShipSize(ship); l++)
+					{
+						if (goodI) scoreBoard[i + l][j] += getShipScore(ship);
+						if (goodJ) scoreBoard[i][j + l] += getShipScore(ship);
+					}
+				}
+
+	for (int i = 0; i < this->playerBoard->R; i++)
+		for (int j = 0; j < this->playerBoard->C; j++)
+			if (scoreBoard[i][j] > bestScore)
+			{
+				bestScore = scoreBoard[i][j];
+				bestCell = _make_pair(i, j);
+			}
+
+	for (int i = 0; i < this->playerBoard->R; i++) delete[] scoreBoard[i];
+	delete[] scoreBoard;
+
+	if (_canAttack(bestCell.first, bestCell.second)) return bestCell;
+
+	// no more available moves
+	return make_pair(-1, -1);
+}
 
 std::pair<int, int> BattleshipGameAlgoSmart::attack()
 {
 	if (this->target == nullptr)
 	{
+		return _getBestGuess();
 		// currently pretty naive, find better logic here
-		for (int i = 0; i < this->playerBoard->R; i++)
-			for (int j = 0; j < this->playerBoard->C; j++)
-				if (this->_canAttack(i, j)) return _make_pair(i, j);
+		//for (int i = 0; i < this->playerBoard->R; i++)
+			//for (int j = 0; j < this->playerBoard->C; j++)
+				//if (this->_canAttack(i, j)) return _make_pair(i, j);
 	} else // in HUNT mode
 	{
 		if (this->target->direction == -1)

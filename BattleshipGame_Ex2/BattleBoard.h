@@ -66,7 +66,7 @@ public:
 		this->R = R;
 		this->C = C;
 		this->board = new char*[this->R];
-		for (int i = 0; i < this->C; i++) this->board[i] = new char[this->C];
+		for (int i = 0; i < this->R; i++) this->board[i] = new char[this->C];
 
 		if (boardFile.fail())
 		{
@@ -105,7 +105,7 @@ public:
 
 		// copy the init board to  new board member
 		this->board = new char*[this->R];
-		for (int i = 0; i < this->C; i++) this->board[i] = new char[this->C];
+		for (int i = 0; i < this->R; i++) this->board[i] = new char[this->C];
 
 		for (int i = 0; i < this->R; i++)
 		{

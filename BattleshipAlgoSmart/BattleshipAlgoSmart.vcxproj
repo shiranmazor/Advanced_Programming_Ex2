@@ -116,6 +116,11 @@
   <ItemGroup>
     <ClCompile Include="..\BattleshipGame_Ex2\BattleshipGameAlgoSmart.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.vcxproj">
+      <Project>{6e469193-5b00-4cb0-a76c-58b560a11b25}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
