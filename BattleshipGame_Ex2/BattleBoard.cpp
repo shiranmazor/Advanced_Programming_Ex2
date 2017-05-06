@@ -41,7 +41,7 @@ void _collect_ship(BattleBoard* b, int i, int j, std::set<pair<int, int>>* s)
 *  while doing so, also initialize 'ships' Map containing board cells
 *  leading to Vessel object representing the different Vessels on the board.
 */
-bool BattleBoard::isBoardValid()
+bool BattleBoard::isBoardValid(vector<string>& error_messages)
 {
 	int countA = 0;
 	int countB = 0;
@@ -104,16 +104,24 @@ bool BattleBoard::isBoardValid()
 	// print out relevant errors
 	for (int i = 0; i < 8; i++)
 	{
-		if (badShape[i]) cout << "Wrong size or shape for ship " << idx2ship[i] << " for player " << ((i < 4) ? 'A' : 'B') << endl;
+		if (badShape[i])
+		{
+			string error = "Wrong size or shape for ship ";
+			error.append(&(idx2ship[i]));
+			error.append(" for player ");
+			error.append(((i < 4) ? "A" : "B"));
+			error_messages.push_back(error);
+		}
+			
 		totalShape += badShape[i];
 	}
 
-	if (countA > this->playerToolsNum) cout << "Too many ships for player A" << endl;
-	if (countA < this->playerToolsNum) cout << "Too few ships for player A" << endl;
-	if (countB > this->playerToolsNum) cout << "Too many ships for player B" << endl;
-	if (countB < this->playerToolsNum) cout << "Too few ships for player B" << endl;
+	if (countA > this->playerToolsNum) error_messages.push_back( "Too many ships for player A" );
+	if (countA < this->playerToolsNum) error_messages.push_back("Too few ships for player A");
+	if (countB > this->playerToolsNum) error_messages.push_back("Too many ships for player B");
+	if (countB < this->playerToolsNum) error_messages.push_back("Too few ships for player B");
 
-	if (tooClose) cout << "Adjacent Ships on Board" << endl;
+	if (tooClose) error_messages.push_back("Adjacent Ships on Board");
 
 	return (countA == this->playerToolsNum && countB == this->playerToolsNum && !tooClose && totalShape == 0);
 }
@@ -180,15 +188,16 @@ void BattleBoard::getPlayerBoard(Player player, char** &pBoard)
 
 AttackResult BattleBoard::performGameMove(Player p, pair<int, int> move)
 {
-	char c = this->board[move.first][move.second];
+	pair<int, int> boardMove = make_pair(move.first - 1, move.second - 1);
+	char c = this->board[boardMove.first][boardMove.second];
 	if (!isspace(c)) {
 		if (isAlreadyHit(c)) {
-			return (this->ships[makeKey(move)]->hitNum == this->ships[makeKey(move)]->size) ? AttackResult::Miss : AttackResult::Hit;
+			return (this->ships[makeKey(boardMove)]->hitNum == this->ships[makeKey(boardMove)]->size) ? AttackResult::Miss : AttackResult::Hit;
 		}
 		if (isupper(c) || islower(c)) {
-			this->board[move.first][move.second] = isupper(c) ? HitMarkA : HitMarkB;
-			this->ships[makeKey(move)]->hitNum++;
-			return (this->ships[makeKey(move)]->hitNum == this->ships[makeKey(move)]->size) ? AttackResult::Sink : AttackResult::Hit;
+			this->board[boardMove.first][boardMove.second] = isupper(c) ? HitMarkA : HitMarkB;
+			this->ships[makeKey(boardMove)]->hitNum++;
+			return (this->ships[makeKey(boardMove)]->hitNum == this->ships[makeKey(boardMove)]->size) ? AttackResult::Sink : AttackResult::Hit;
 		}
 	}
 	return AttackResult::Miss;
