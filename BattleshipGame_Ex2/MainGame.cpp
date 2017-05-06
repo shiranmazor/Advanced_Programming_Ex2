@@ -218,8 +218,16 @@ int PlayGame(string path, vector<string> gameFiles, tuple<IBattleshipGameAlgo*, 
 			for (int j = 0; j < mainBoard->C; j++)
 			{
 				char c = mainBoard->board[i][j];
-				int color = WHITE;
-				if (isPlayer(c)) color = isupper(c) ? GREEN : RED;
+				int color;
+				if (isPlayer(c)) 
+				{
+					color = isupper(c) ? GREEN : RED;
+				}
+				else
+				{
+					color = WHITE;
+					c = '_';
+				}
 				SetConsoleTextAttribute(hConsole, color);
 				(j != mainBoard->C - 1) ? cout << c : cout << c << endl;
 			}
@@ -260,13 +268,13 @@ int PlayGame(string path, vector<string> gameFiles, tuple<IBattleshipGameAlgo*, 
 		// update board on consul 
 		if ((!isQuiet) && (moveRes != AttackResult::Miss))
 		{
-			char c = mainBoard->board[attackMove.first][attackMove.second];
-			int color = currentPlayer->playerName == A ? GREEN : RED;
+			char c = mainBoard->board[attackMove.first - 1][attackMove.second - 1];
+			int color = c == HitMarkA ? GREEN : RED;
 
 			ShowConsoleCursor(false);
 			HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-			gotoxy(attackMove.first, attackMove.second);
-			SetConsoleTextAttribute(hConsole, GREEN);
+			gotoxy(attackMove.first - 1, attackMove.second - 1);
+			SetConsoleTextAttribute(hConsole, color);
 			cout << c;
 			ShowConsoleCursor(true);
 			Sleep(delay);
@@ -290,6 +298,10 @@ int PlayGame(string path, vector<string> gameFiles, tuple<IBattleshipGameAlgo*, 
 			currentPlayer = swapPlayer(currentPlayer, playerA, playerB);
 
 	}
+	
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	gotoxy(mainBoard->R + 1, 0);
+	SetConsoleTextAttribute(hConsole, WHITE);
 
 	if (victory)
 	{
