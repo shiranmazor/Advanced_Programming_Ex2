@@ -9,6 +9,8 @@
 #define MySinkMark '!'
 #define OpSinkMark '?'
 
+#define _make_pair(x, y) make_pair(x + 1, y + 1)
+
 enum Player { A, B };
 using namespace std;
 
