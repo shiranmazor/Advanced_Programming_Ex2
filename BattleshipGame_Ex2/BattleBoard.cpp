@@ -1,6 +1,4 @@
 #include "BattleBoard.h"
-#include <iostream>
-#include <ppltasks.h>
 
 /*
 * 	Board validation assisting function, returns:

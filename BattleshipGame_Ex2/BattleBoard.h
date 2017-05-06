@@ -8,6 +8,9 @@
 #include "IBattleshipGameAlgo.h"
 #include <string.h>
 #include <set>
+#include <iostream>
+#include <ppltasks.h>
+
 using namespace std;
 
 #define isPlayerChar(x, y) (x==A && (isupper(y) || isspace(y)) || (x==B && (islower(y) || isspace(y))))
@@ -56,7 +59,6 @@ public:
 	BattleBoard& operator = (const BattleBoard&) = delete;
 
 	// constructor
-	BattleBoard(){}
 	BattleBoard(string boardFilePath, int R = 10, int C = 10) :playerToolsNum(5)
 	{
 		ifstream boardFile(boardFilePath);
@@ -68,7 +70,7 @@ public:
 
 		if (boardFile.fail())
 		{
-			// error message for file not found
+			std::cout << "Missing board file (*.sboard) looking in path: " << boardFilePath << endl;
 			boardFile.close();
 		}
 
@@ -81,7 +83,7 @@ public:
 
 			else {
 				temp.copy(this->board[i], temp.length());
-				for (int j = temp.length() - 1; j < this->C; j++) this->board[i][j] = ' ';
+				for (int j = int(temp.length()) - 1; j < this->C; j++) this->board[i][j] = ' ';
 			}
 
 			if (std::ifstream::eofbit) {
@@ -117,9 +119,10 @@ public:
 		if (this->board != NULL)
 		{
 			set<Vessel*> vessles;
-
-			delete[] this->board;
-
+			for (int i = 0; i < this->R; i++)
+			{
+				delete[] this->board[i];
+			}
 			for (auto const& element : this->ships)
 				vessles.insert(element.second);
 			for (auto const& element : vessles)

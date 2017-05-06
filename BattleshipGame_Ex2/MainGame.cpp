@@ -218,21 +218,13 @@ int PlayGame(string path, vector<string> gameFiles, tuple<IBattleshipGameAlgo*, 
 			for (int j = 0; j < mainBoard->C; j++)
 			{
 				char c = mainBoard->board[i][j];
-				int color;
-				if (isPlayer(c)) 
-				{
-					color = isupper(c) ? GREEN : RED;
-				}
-				else
-				{
-					color = WHITE;
-					c = '_';
-				}
+				int color = isPlayerA(c) ? GREEN : RED;
+				color = isspace(c) ? WHITE : color;
+				c = isspace(c) ? '_' : c;
 				SetConsoleTextAttribute(hConsole, color);
 				(j != mainBoard->C - 1) ? cout << c : cout << c << endl;
 			}
 		}
-		ShowConsoleCursor(true);
 		Sleep(delay);
 	}
 
@@ -245,6 +237,7 @@ int PlayGame(string path, vector<string> gameFiles, tuple<IBattleshipGameAlgo*, 
 	{
 		//set current player board
 		attackMove = currentPlayer->attack();
+		
 		if (attackMove.first == -1 && attackMove.second == -1)
 		{
 			if (onePlayerGame && onePlayerName == currentPlayer->playerName)
@@ -263,21 +256,32 @@ int PlayGame(string path, vector<string> gameFiles, tuple<IBattleshipGameAlgo*, 
 
 			continue;
 		}
+		else if (attackMove.first < 1 || attackMove.first > 10 || attackMove.second < 1 || attackMove.second > 10)//check attack valid range
+		{
+			//ignore bad attack move from other algorithms
+			continue;
+		}
 		AttackResult moveRes = mainBoard->performGameMove(currentPlayer->playerName, attackMove);
+		
 
 		// update board on consul 
-		if ((!isQuiet) && (moveRes != AttackResult::Miss))
+		if (!isQuiet)
 		{
-			char c = mainBoard->board[attackMove.first - 1][attackMove.second - 1];
-			int color = c == HitMarkA ? GREEN : RED;
-
-			ShowConsoleCursor(false);
 			HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+			// mark as bombed
 			gotoxy(attackMove.first - 1, attackMove.second - 1);
+			SetConsoleTextAttribute(hConsole, YELLOW);
+			cout << '@';
+			Sleep(delay);
+
+			// update mark after bombing
+			gotoxy(attackMove.first - 1, attackMove.second - 1);
+			char c = mainBoard->board[attackMove.first - 1][attackMove.second - 1];
+			int color = isPlayerA(c) ? GREEN : RED;
+			color = isspace(c) ? WHITE : color;
+			c = isspace(c) ? '_' : c;
 			SetConsoleTextAttribute(hConsole, color);
 			cout << c;
-			ShowConsoleCursor(true);
-			Sleep(delay);
 		}
 
 		//notify both players on the moveAttak results
@@ -316,6 +320,9 @@ int PlayGame(string path, vector<string> gameFiles, tuple<IBattleshipGameAlgo*, 
 	std::cout << "Player A: " << gameScore.first << endl;
 	std::cout << "Player B: " << gameScore.second << endl;
 
+	//free memory
+	delete get<0>(players);
+	delete get<1>(players);
 	return 0;
 }
 
@@ -323,7 +330,7 @@ int main(int argc, char **argv)
 {
 	string path; bool boardValid = true; bool dllExist = true;
 	vector<string> error_messages;
-	BattleBoard* mainBoard;
+	BattleBoard* mainBoard = NULL;
 	vector<string> gameFiles;
 	vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>>  dll_vec;
 	char the_path[256];
@@ -358,10 +365,7 @@ int main(int argc, char **argv)
 	//path is valid, continue
 	getGameFiles(path, gameFiles);
 	if (gameFiles.size() == 0 || (gameFiles.size() > 0 && gameFiles[0].find("sboard") == std::string::npos))
-	{
-		mainBoard = new BattleBoard();
 		error_messages.push_back("Missing board file (*.sboard) looking in path:" + path);
-	}
 		
 	else//sboard file exist
 	{
@@ -384,8 +388,10 @@ int main(int argc, char **argv)
 	if (!loadAlgoDllAndInitGame(path,gameFiles,mainBoard,players, dllLoaded))
 		return -1;
 	int ret = PlayGame(path, gameFiles, players, isQuiet, delay, mainBoard);
-	closeDLLs(dllLoaded);
 	
+	closeDLLs(dllLoaded);
+	if (mainBoard != NULL)
+		delete mainBoard;
 	return ret;
 
 }

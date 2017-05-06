@@ -23,7 +23,7 @@ using namespace std;
 #define WHITE 15
 #define HitMarkA '*'
 #define HitMarkB '#'
-#define isPlayer(y)  (isupper(y) || islower(y))
+#define isPlayerA(y)  (isupper(y) || y == HitMarkA)
 
 // define function of the type we expect
 typedef IBattleshipGameAlgo *(*GetAlgorithmFuncType)();
