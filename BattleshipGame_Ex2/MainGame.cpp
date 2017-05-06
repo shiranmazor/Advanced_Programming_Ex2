@@ -218,21 +218,13 @@ int PlayGame(string path, vector<string> gameFiles, tuple<IBattleshipGameAlgo*, 
 			for (int j = 0; j < mainBoard->C; j++)
 			{
 				char c = mainBoard->board[i][j];
-				int color;
-				if (isPlayer(c)) 
-				{
-					color = isupper(c) ? GREEN : RED;
-				}
-				else
-				{
-					color = WHITE;
-					c = '_';
-				}
+				int color = isPlayerA(c) ? GREEN : RED;
+				color = isspace(c) ? WHITE : color;
+				c = isspace(c) ? '_' : c;
 				SetConsoleTextAttribute(hConsole, color);
 				(j != mainBoard->C - 1) ? cout << c : cout << c << endl;
 			}
 		}
-		ShowConsoleCursor(true);
 		Sleep(delay);
 	}
 
@@ -270,20 +262,26 @@ int PlayGame(string path, vector<string> gameFiles, tuple<IBattleshipGameAlgo*, 
 			continue;
 		}
 		AttackResult moveRes = mainBoard->performGameMove(currentPlayer->playerName, attackMove);
+		
 
 		// update board on consul 
-		if ((!isQuiet) && (moveRes != AttackResult::Miss))
+		if (!isQuiet)
 		{
-			char c = mainBoard->board[attackMove.first - 1][attackMove.second - 1];
-			int color = c == HitMarkA ? GREEN : RED;
-
-			ShowConsoleCursor(false);
 			HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+			// mark as bombed
 			gotoxy(attackMove.first - 1, attackMove.second - 1);
+			SetConsoleTextAttribute(hConsole, YELLOW);
+			cout << '@';
+			Sleep(delay);
+
+			// update mark after bombing
+			gotoxy(attackMove.first - 1, attackMove.second - 1);
+			char c = mainBoard->board[attackMove.first - 1][attackMove.second - 1];
+			int color = isPlayerA(c) ? GREEN : RED;
+			color = isspace(c) ? WHITE : color;
+			c = isspace(c) ? '_' : c;
 			SetConsoleTextAttribute(hConsole, color);
 			cout << c;
-			ShowConsoleCursor(true);
-			Sleep(delay);
 		}
 
 		//notify both players on the moveAttak results
