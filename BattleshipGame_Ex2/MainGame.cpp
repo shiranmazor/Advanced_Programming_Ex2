@@ -182,22 +182,33 @@ void gotoxy(int line, int column)
 	SetConsoleCursorPosition(hConsole, coord);
 }
 
-void setTextColor(int color)
-{
-	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-	SetConsoleTextAttribute(hConsole, color);
-}
-
 void ShowConsoleCursor(bool showFlag)
 {
 	HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
 
 	CONSOLE_CURSOR_INFO     cursorInfo;
-
+	
 	GetConsoleCursorInfo(out, &cursorInfo);
+	
 	cursorInfo.bVisible = showFlag; // set the cursor visibility
 	SetConsoleCursorInfo(out, &cursorInfo);
 }
+
+COORD GetConsoleCursorPosition(HANDLE hConsoleOutput)
+{
+	CONSOLE_SCREEN_BUFFER_INFO cbsi;
+	if (GetConsoleScreenBufferInfo(hConsoleOutput, &cbsi))
+	{
+		return cbsi.dwCursorPosition;
+	}
+	else
+	{
+		// The function failed. Call GetLastError() for details.
+		COORD invalid = { 0, 0 };
+		return invalid;
+	}
+}
+
 
 
 int PlayGame(string path, vector<string> gameFiles, tuple<IBattleshipGameAlgo*, IBattleshipGameAlgo*>& players, 
@@ -209,14 +220,17 @@ int PlayGame(string path, vector<string> gameFiles, tuple<IBattleshipGameAlgo*, 
 	IBattleshipGameAlgo* playerB = get<1>(players);
 
 	// init board on console
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	int firstRow = GetConsoleCursorPosition(hConsole).Y;
 	if (!isQuiet)
 	{
-		HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+		
 		ShowConsoleCursor(false);
 		for (int i = 0; i < mainBoard->R; i++)
 		{
 			for (int j = 0; j < mainBoard->C; j++)
 			{
+				//HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 				char c = mainBoard->board[i][j];
 				int color = isPlayerA(c) ? GREEN : RED;
 				color = isspace(c) ? WHITE : color;
@@ -267,15 +281,15 @@ int PlayGame(string path, vector<string> gameFiles, tuple<IBattleshipGameAlgo*, 
 		// update board on consul 
 		if (!isQuiet)
 		{
-			HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+			
 			// mark as bombed
-			gotoxy(attackMove.first - 1, attackMove.second - 1);
+			gotoxy(firstRow + attackMove.first - 1, attackMove.second - 1);
 			SetConsoleTextAttribute(hConsole, YELLOW);
 			cout << '@';
 			Sleep(delay);
 
-			// update mark after bombing
-			gotoxy(attackMove.first - 1, attackMove.second - 1);
+			// update mark after bombing			
+			gotoxy(firstRow + attackMove.first - 1, attackMove.second - 1);
 			char c = mainBoard->board[attackMove.first - 1][attackMove.second - 1];
 			int color = isPlayerA(c) ? GREEN : RED;
 			color = isspace(c) ? WHITE : color;
@@ -302,9 +316,9 @@ int PlayGame(string path, vector<string> gameFiles, tuple<IBattleshipGameAlgo*, 
 			currentPlayer = swapPlayer(currentPlayer, playerA, playerB);
 
 	}
-	
-	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-	gotoxy(mainBoard->R + 1, 0);
+	// reset the color and cursor
+	firstRow = !isQuiet ? firstRow + mainBoard->R + 1 : firstRow;
+	gotoxy(firstRow, 0);
 	SetConsoleTextAttribute(hConsole, WHITE);
 
 	if (victory)
