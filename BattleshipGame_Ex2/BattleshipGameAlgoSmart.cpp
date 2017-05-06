@@ -2,6 +2,8 @@
 #include <utility>
 #include "BattleshipGameAlgoSmart.h"
 
+#define _make_pair(x, y) make_pair(x + 1, y + 1)
+
 IBattleshipGameAlgo* GetAlgorithm()
 {
 	_instancesVec.push_back(new BattleshipGameAlgoSmart());	// Create new instance and keep it in vector
@@ -52,33 +54,33 @@ std::pair<int, int> BattleshipGameAlgoSmart::attack()
 		// currently pretty naive, find better logic here
 		for (int i = 0; i < this->playerBoard->R; i++)
 			for (int j = 0; j < this->playerBoard->C; j++)
-				if (this->_canAttack(i, j)) return make_pair(i, j);
+				if (this->_canAttack(i, j)) return _make_pair(i, j);
 	} else // in HUNT mode
 	{
 		if (this->target->direction == -1)
 		{
-			if (this->_canAttack(this->target->edges[0].first - 1, this->target->edges[0].second)) return make_pair(this->target->edges[0].first - 1, this->target->edges[0].second);
-			if (this->_canAttack(this->target->edges[0].first + 1, this->target->edges[0].second)) return make_pair(this->target->edges[0].first + 1, this->target->edges[0].second);
-			if (this->_canAttack(this->target->edges[0].first, this->target->edges[0].second + 1)) return make_pair(this->target->edges[0].first, this->target->edges[0].second + 1);
-			if (this->_canAttack(this->target->edges[0].first, this->target->edges[0].second - 1)) return make_pair(this->target->edges[0].first, this->target->edges[0].second - 1);
+			if (this->_canAttack(this->target->edges[0].first - 1, this->target->edges[0].second)) return _make_pair(this->target->edges[0].first - 1, this->target->edges[0].second);
+			if (this->_canAttack(this->target->edges[0].first + 1, this->target->edges[0].second)) return _make_pair(this->target->edges[0].first + 1, this->target->edges[0].second);
+			if (this->_canAttack(this->target->edges[0].first, this->target->edges[0].second + 1)) return _make_pair(this->target->edges[0].first, this->target->edges[0].second + 1);
+			if (this->_canAttack(this->target->edges[0].first, this->target->edges[0].second - 1)) return _make_pair(this->target->edges[0].first, this->target->edges[0].second - 1);
 		}
 		if (this->target->direction == 0) // horizontal
 		{
 			if (this->target->edgeReached != 0) // didn't reach the end of target vessel with edge[0]
 			{
 				if (this->target->edges[0].second > this->target->edges[1].second && this->_canAttack(this->target->edges[0].first, this->target->edges[0].second + 1))
-					return make_pair(this->target->edges[0].first, this->target->edges[0].second + 1);
+					return _make_pair(this->target->edges[0].first, this->target->edges[0].second + 1);
 				if (this->target->edges[0].second < this->target->edges[1].second && this->_canAttack(this->target->edges[0].first, this->target->edges[0].second - 1))
-					return make_pair(this->target->edges[0].first, this->target->edges[0].second - 1);
+					return _make_pair(this->target->edges[0].first, this->target->edges[0].second - 1);
 				// in the case that an attack cannot be made from this edge, mark it as reached
 				this->target->edgeReached = 0;
 			}
 			if (this->target->edgeReached != 1) // didn't reach the end of target vessel with edge[1]
 			{
 				if (this->target->edges[1].second > this->target->edges[0].second && this->_canAttack(this->target->edges[1].first, this->target->edges[1].second + 1))
-					return make_pair(this->target->edges[1].first, this->target->edges[1].second + 1);
+					return _make_pair(this->target->edges[1].first, this->target->edges[1].second + 1);
 				if (this->target->edges[1].second < this->target->edges[0].second && this->_canAttack(this->target->edges[1].first, this->target->edges[1].second - 1))
-					return make_pair(this->target->edges[1].first, this->target->edges[1].second - 1);
+					return _make_pair(this->target->edges[1].first, this->target->edges[1].second - 1);
 				// in the case that an attack cannot be made from this edge, mark it as reached
 				this->target->edgeReached = 1;
 			}
@@ -88,18 +90,18 @@ std::pair<int, int> BattleshipGameAlgoSmart::attack()
 			if (this->target->edgeReached != 0) // didn't reach the end of target vessel with edge[0]
 			{
 				if (this->target->edges[0].second > this->target->edges[1].second && this->_canAttack(this->target->edges[0].first + 1, this->target->edges[0].second))
-					return make_pair(this->target->edges[0].first + 1, this->target->edges[0].second);
+					return _make_pair(this->target->edges[0].first + 1, this->target->edges[0].second);
 				if (this->target->edges[0].second < this->target->edges[1].second && this->_canAttack(this->target->edges[0].first - 1, this->target->edges[0].second))
-					return make_pair(this->target->edges[0].first - 1, this->target->edges[0].second - 1);
+					return _make_pair(this->target->edges[0].first - 1, this->target->edges[0].second - 1);
 				// in the case that an attack cannot be made from this edge, mark it as reached
 				this->target->edgeReached = 0;
 			}
 			if (this->target->edgeReached != 1) // didn't reach the end of target vessel with edge[1]
 			{
 				if (this->target->edges[1].second > this->target->edges[0].second && this->_canAttack(this->target->edges[1].first + 1, this->target->edges[1].second))
-					return make_pair(this->target->edges[1].first + 1, this->target->edges[1].second);
+					return _make_pair(this->target->edges[1].first + 1, this->target->edges[1].second);
 				if (this->target->edges[1].second < this->target->edges[0].second && this->_canAttack(this->target->edges[1].first - 1, this->target->edges[1].second))
-					return make_pair(this->target->edges[1].first - 1, this->target->edges[1].second);
+					return _make_pair(this->target->edges[1].first - 1, this->target->edges[1].second);
 				// in the case that an attack cannot be made from this edge, mark it as reached
 				this->target->edgeReached = 1;
 			}
@@ -107,11 +109,13 @@ std::pair<int, int> BattleshipGameAlgoSmart::attack()
 	}
 	// safety, should never get here
 	cout << "BattleshipGameAlgoSmart.attack: Something went wrong, can't find next cell to attack (Player " << this->playerNum << ", currently in " << (this->target == nullptr ? "HUNT" : "TARGET") << " mode)" << endl;
-	return make_pair(0, 0);
+	return make_pair(-1, -1);
 }
 
 void BattleshipGameAlgoSmart::notifyOnAttackResult(int player, int row, int col, AttackResult result)
 {
+	row -= 1;
+	col -= 1;
 	if (player == this->playerName)
 	{
 		this->irrelevantCells.insert(make_pair(row, col));

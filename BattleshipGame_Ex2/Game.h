@@ -13,12 +13,15 @@
 
 using namespace std;
 
-#define GREEN 10;
-#define RED 12;
-#define BLUE 9;
-#define PURPLE  13;
-#define YELLOW 14;
-#define WHITE 15;
+#define GREEN 10
+#define RED 12
+#define BLUE 9
+#define PURPLE  13
+#define YELLOW 14
+#define WHITE 15
+#define HitMarkA '*'
+#define HitMarkB '#'
+#define isPlayer(y)  (isupper(y) || isspace(y) || islower(y))
 
 // define function of the type we expect
 typedef IBattleshipGameAlgo *(*GetAlgorithmFuncType)();
