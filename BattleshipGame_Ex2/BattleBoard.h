@@ -68,7 +68,7 @@ public:
 
 		if (boardFile.fail())
 		{
-			// error message for file not found
+			cout << "Missing board file (*.sboard) looking in path: " << boardFilePath << endl;
 			boardFile.close();
 		}
 
@@ -81,7 +81,7 @@ public:
 
 			else {
 				temp.copy(this->board[i], temp.length());
-				for (int j = temp.length() - 1; j < this->C; j++) this->board[i][j] = ' ';
+				for (int j = int(temp.length()) - 1; j < this->C; j++) this->board[i][j] = ' ';
 			}
 
 			if (std::ifstream::eofbit) {
