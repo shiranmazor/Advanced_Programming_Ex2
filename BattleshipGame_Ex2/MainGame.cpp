@@ -222,7 +222,7 @@ int PlayGame(string path, vector<string> gameFiles, tuple<IBattleshipGameAlgo*, 
 				int color = WHITE;
 				if (isPlayer(c)) color = isupper(c) ? GREEN : RED;
 				SetConsoleTextAttribute(hConsole, color);
-				(j != mainBoard->C - 1) ? cout << color << c : cout << color << c << endl;
+				(j != mainBoard->C - 1) ? cout << c : cout << c << endl;
 			}
 		}
 		ShowConsoleCursor(true);
@@ -268,7 +268,7 @@ int PlayGame(string path, vector<string> gameFiles, tuple<IBattleshipGameAlgo*, 
 			HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 			gotoxy(attackMove.first, attackMove.second);
 			SetConsoleTextAttribute(hConsole, GREEN);
-			cout << color << c;
+			cout << c;
 			ShowConsoleCursor(true);
 			Sleep(delay);
 		}
