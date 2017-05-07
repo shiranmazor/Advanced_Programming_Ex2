@@ -39,10 +39,8 @@ public:
 
 	~BattleshipGameAlgoSmart()
 	{
-		if (playerBoard != nullptr)
-			delete playerBoard;
-		if (target != nullptr)
-			delete target;
+		delete playerBoard;
+		delete target;
 	}
 
 	virtual void setBoard(int player, const char** board, int numRows, int numCols) override;

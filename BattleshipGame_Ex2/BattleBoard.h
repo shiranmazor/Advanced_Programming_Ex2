@@ -70,8 +70,9 @@ public:
 
 		if (boardFile.fail())
 		{
-			std::cout << "Missing board file (*.sboard) looking in path: " << boardFilePath << endl;
+			cout << "Missing board file (*.sboard) looking in path: " << boardFilePath << endl;
 			boardFile.close();
+			return;
 		}
 
 		for (int i = 0; i < this->R; i++)
@@ -87,7 +88,8 @@ public:
 			}
 
 			if (std::ifstream::eofbit) {
-				// eof reached in less than R line, print error
+				cout << "Board file (*.sboard) containing board of wrong shape, expecting " << R << "X" << C << " board, looking in path: " << boardFilePath << endl;
+				return;
 			}
 		}
 		boardFile.close();

@@ -13,8 +13,8 @@ void BattleshipGameAlgoSmart::setBoard(int player, const char** board, int numRo
 {
 	this->playerNum = player;
 	this->playerName = (player == 0) ? A : B;
-	if (this->playerBoard != nullptr)
-		delete this->playerBoard; //avoid memory leak
+
+	delete this->playerBoard; //avoid memory leak
 
 	this->playerBoard = new BattleBoard(board, numRows, numCols);
 	this->hostileShipsNum = this->playerBoard->playerToolsNum;
@@ -25,17 +25,10 @@ bool BattleshipGameAlgoSmart::_canAttack(int i, int j) const
 	return (i >= 0 && i < this->playerBoard->R && j >= 0 && j < this->playerBoard->C && this->playerBoard->board[i][j] == ' ');
 }
 
-void print_board(char** b)
-{
-	cout << "Player Board:" << endl;
-	for (int i = 0; i < 10; i++) cout << b[i] << endl;
-}
-
 void BattleshipGameAlgoSmart::_markIrrelevant(int i, int j) const
 {
 	if (i >= 0 && i < this->playerBoard->R && j >= 0 && j < this->playerBoard->C)
 		this->playerBoard->board[i][j] = irrelevnatCell;
-	//print_board(this->playerBoard->board);
 }
 
 bool BattleshipGameAlgoSmart::init(const std::string& path)
@@ -61,17 +54,16 @@ bool BattleshipGameAlgoSmart::init(const std::string& path)
 
 pair<int, int> BattleshipGameAlgoSmart::_getBestGuess() const
 {
-	int** scoreBoard = new int*[this->playerBoard->R];
+	vector<vector<int>> scoreBoard(this->playerBoard->R, vector<int>(this->playerBoard->C));
 	bool goodI, goodJ;
-	list<int> scores;
-	unordered_map<int, list<pair<int, int>>> scoreToCells;
-
+	pair<int, int> bestCell;
+	int bestScore = -1;
+	 
 	for (int i = 0; i < this->playerBoard->R; i++)
-	{
-		scoreBoard[i] = new int[this->playerBoard->C];
 		for (int j = 0; j < this->playerBoard->C; j++) scoreBoard[i][j] = 0;
-	}
 
+	// Calculate score for each cell on the board according to how many ships 
+	// could be placed there (and how much points those ships get)
 	for (char ship : shipsBySize)
 	{
 		for (int i = 0; i < this->playerBoard->R; i++)
@@ -82,45 +74,37 @@ pair<int, int> BattleshipGameAlgoSmart::_getBestGuess() const
 				{
 					goodI = true;
 					goodJ = true;
-					for (int l = 1; l < getShipSize(ship); l++)
+					for (int l = 1; l < getShipSize(ship); l++) // Verify there is room for the whole ship
 					{
 						if (!this->_canAttack(i + l, j)) goodI = false;
 						if (!this->_canAttack(i, j + l)) goodJ = false;
 					}
-					for (int l = 0; l < getShipSize(ship); l++)
+					for (int l = 0; l < getShipSize(ship); l++) // Add ship's score to all relevant cells
 					{
 						if (goodI) scoreBoard[i + l][j] += getShipScore(ship);
-						if (goodJ) scoreBoard[i][j + l] += getShipScore(ship);
+						if (goodJ && getShipSize(ship) > 1) scoreBoard[i][j + l] += getShipScore(ship); // Prevent double scoring for 'b' ships
 					}
 				}
 			}
 		}
 	}
 
+	// Find highest scored cell
 	for (int i = 0; i < this->playerBoard->R; i++)
 	{
 		for (int j = 0; j < this->playerBoard->C; j++)
 		{
-			scores.push_front(scoreBoard[i][j]);
-			scoreToCells[scoreBoard[i][j]].push_front(_make_pair(i, j));
+			if (scoreBoard[i][j] > bestScore)
+			{
+				bestScore = scoreBoard[i][j];
+				bestCell = _make_pair(i, j);
+			}
 		}
 	}
 
-	for (int i = 0; i < this->playerBoard->R; i++) delete[] scoreBoard[i];
-	delete[] scoreBoard;
+	if (_canAttack(bestCell.first - 1, bestCell.second - 1)) return bestCell;
 
-	scores.sort();
-	scores.reverse();
-
-	for (int score : scores)
-	{
-		for (pair<int, int> cell : scoreToCells[score])
-		{
-			if (_canAttack(cell.first - 1, cell.second - 1)) return cell;
-		}
-	}
-
-	// no more available moves (safety)
+	// No more available moves (safety)
 	return make_pair(-1, -1);
 }
 
@@ -255,7 +239,7 @@ void BattleshipGameAlgoSmart::notifyOnAttackResult(int player, int row, int col,
 			this->_markIrrelevant(row, col + 1);
 			this->_markIrrelevant(row, col - 1);
 
-			if (this->target != nullptr) delete this->target;
+			delete this->target;
 			this->target = nullptr; // back to search mode
 			this->hostileShipsNum -= 1;
 			break;

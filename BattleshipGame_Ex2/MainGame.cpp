@@ -353,7 +353,7 @@ int main(int argc, char **argv)
 	_getcwd(the_path, 255);
 	path = std::string(the_path);
 	bool isQuiet = false;
-	int delay = 100;
+	int delay = 200;
 	// parse command line parameters
 	int i = 0;
 	while (i < argc)
