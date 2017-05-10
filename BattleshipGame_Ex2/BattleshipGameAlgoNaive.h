@@ -35,4 +35,6 @@ public:
 	virtual std::pair<int, int> attack() override;
 	virtual void notifyOnAttackResult(int player, int row, int col, AttackResult result) override;
 
+private:
+	bool _canAttack(int i, int j) const;
 };

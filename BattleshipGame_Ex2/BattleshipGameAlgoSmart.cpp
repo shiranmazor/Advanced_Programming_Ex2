@@ -9,17 +9,6 @@ IBattleshipGameAlgo* GetAlgorithm()
 	return _instancesVec[_instancesVec.size() - 1];		// Return last instance
 }
 
-void BattleshipGameAlgoSmart::setBoard(int player, const char** board, int numRows, int numCols)
-{
-	this->playerNum = player;
-	this->playerName = (player == 0) ? A : B;
-
-	delete this->playerBoard; //avoid memory leak
-
-	this->playerBoard = new BattleBoard(board, numRows, numCols);
-	this->hostileShipsNum = this->playerBoard->playerToolsNum;
-}
-
 bool BattleshipGameAlgoSmart::_canAttack(int i, int j) const
 {
 	return (i >= 0 && i < this->playerBoard->R && j >= 0 && j < this->playerBoard->C && this->playerBoard->board[i][j] == ' ');
@@ -29,6 +18,17 @@ void BattleshipGameAlgoSmart::_markIrrelevant(int i, int j) const
 {
 	if (i >= 0 && i < this->playerBoard->R && j >= 0 && j < this->playerBoard->C)
 		this->playerBoard->board[i][j] = irrelevnatCell;
+}
+
+void BattleshipGameAlgoSmart::setBoard(int player, const char** board, int numRows, int numCols)
+{
+	this->playerNum = player;
+	this->playerName = (player == 0) ? A : B;
+
+	delete this->playerBoard; //avoid memory leak
+
+	this->playerBoard = new BattleBoard(board, numRows, numCols);
+	this->hostileShipsNum = this->playerBoard->playerToolsNum;
 }
 
 bool BattleshipGameAlgoSmart::init(const std::string& path)
@@ -63,7 +63,7 @@ pair<int, int> BattleshipGameAlgoSmart::_getBestGuess() const
 		for (int j = 0; j < this->playerBoard->C; j++) scoreBoard[i][j] = 0;
 
 	// Calculate score for each cell on the board according to how many ships 
-	// could be placed there (and how much points those ships get)
+	// could be placed there (and how much points those ships are worth)
 	for (char ship : shipsBySize)
 	{
 		for (int i = 0; i < this->playerBoard->R; i++)
@@ -82,7 +82,7 @@ pair<int, int> BattleshipGameAlgoSmart::_getBestGuess() const
 					for (int l = 0; l < getShipSize(ship); l++) // Add ship's score to all relevant cells
 					{
 						if (goodI) scoreBoard[i + l][j] += getShipScore(ship);
-						if (goodJ && getShipSize(ship) > 1) scoreBoard[i][j + l] += getShipScore(ship); // Prevent double scoring for 'b' ships
+						if (goodJ && getShipSize(ship) > 1) scoreBoard[i][j + l] += getShipScore(ship); // Prevent double scoring for 1 cell ships
 					}
 				}
 			}
@@ -142,23 +142,22 @@ std::pair<int, int> BattleshipGameAlgoSmart::attack()
 			// in the case that an attack cannot be made from this edge, mark it as reached
 			this->target->edgeReached = 1;
 		}
-	}
-	else // this->target->direction == 1, vertical
+	} else // this->target->direction == 1, vertical
 	{
 		if (this->target->edgeReached != 0) // didn't reach the end of target vessel with edge[0]
 		{
-			if (this->target->edges[0].second > this->target->edges[1].second && this->_canAttack(this->target->edges[0].first + 1, this->target->edges[0].second))
+			if (this->target->edges[0].first > this->target->edges[1].first && this->_canAttack(this->target->edges[0].first + 1, this->target->edges[0].second))
 				return _make_pair(this->target->edges[0].first + 1, this->target->edges[0].second);
-			if (this->target->edges[0].second < this->target->edges[1].second && this->_canAttack(this->target->edges[0].first - 1, this->target->edges[0].second))
+			if (this->target->edges[0].first < this->target->edges[1].first && this->_canAttack(this->target->edges[0].first - 1, this->target->edges[0].second))
 				return _make_pair(this->target->edges[0].first - 1, this->target->edges[0].second - 1);
 			// in the case that an attack cannot be made from this edge, mark it as reached
 			this->target->edgeReached = 0;
 		}
 		if (this->target->edgeReached != 1) // didn't reach the end of target vessel with edge[1]
 		{
-			if (this->target->edges[1].second > this->target->edges[0].second && this->_canAttack(this->target->edges[1].first + 1, this->target->edges[1].second))
+			if (this->target->edges[1].first > this->target->edges[0].first && this->_canAttack(this->target->edges[1].first + 1, this->target->edges[1].second))
 				return _make_pair(this->target->edges[1].first + 1, this->target->edges[1].second);
-			if (this->target->edges[1].second < this->target->edges[0].second && this->_canAttack(this->target->edges[1].first - 1, this->target->edges[1].second))
+			if (this->target->edges[1].first < this->target->edges[0].first && this->_canAttack(this->target->edges[1].first - 1, this->target->edges[1].second))
 				return _make_pair(this->target->edges[1].first - 1, this->target->edges[1].second);
 			// in the case that an attack cannot be made from this edge, mark it as reached
 			this->target->edgeReached = 1;
@@ -200,7 +199,7 @@ void BattleshipGameAlgoSmart::notifyOnAttackResult(int player, int row, int col,
 					this->target->edges[1] = make_pair(row, col);
 					this->target->direction = this->target->edges[0].second == this->target->edges[1].second;
 					
-					// add edge[0]'s surrounding cells to irrelevantCells according to direction
+					// mark edge[0]'s surrounding cells as irrelevant according to direction
 					if (this->target->direction == 0)
 					{
 						this->_markIrrelevant(this->target->edges[0].first + 1, this->target->edges[0].second);
@@ -219,13 +218,12 @@ void BattleshipGameAlgoSmart::notifyOnAttackResult(int player, int row, int col,
 						this->target->edges[0] = make_pair(row, col);
 				}
 
-				// add current cell's surrounding cells to irrelevantCells according to direction
+				// mark current cell's surrounding cells as irrelevant according to direction
 				if (this->target->direction == 0)
 				{
 					this->_markIrrelevant(row + 1, col);
 					this->_markIrrelevant(row - 1, col);
-				}
-				else
+				} else
 				{
 					this->_markIrrelevant(row, col + 1);
 					this->_markIrrelevant(row, col - 1);
@@ -233,7 +231,7 @@ void BattleshipGameAlgoSmart::notifyOnAttackResult(int player, int row, int col,
 			}
 			break;
 		case AttackResult::Sink:
-			// add surrounding cells to irrelevantCells (last hit, can add all directions)
+			// mark surrounding cells as irrelevant (last hit, can add all directions)
 			this->_markIrrelevant(row + 1, col);
 			this->_markIrrelevant(row - 1, col);
 			this->_markIrrelevant(row, col + 1);

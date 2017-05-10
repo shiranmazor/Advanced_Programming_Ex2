@@ -8,34 +8,23 @@ IBattleshipGameAlgo* GetAlgorithm()
 	return _instancesVec[_instancesVec.size() - 1];		// Return last instance
 }
 
+bool BattleshipGameAlgoNaive::_canAttack(int i, int j) const
+{
+	return ((i + 1 == this->playerBoard->R || this->playerBoard->board[i + 1][j] == ' ') &&
+			(i == 0 || this->playerBoard->board[i - 1][j] == ' ') &&
+			(j + 1 == this->playerBoard->C || this->playerBoard->board[i][j + 1] == ' ') &&
+			(j == 0 || this->playerBoard->board[i][j - 1] == ' '));
+}
+
 void BattleshipGameAlgoNaive::setBoard(int player, const char** board, int numRows, int numCols)
 {
 	this->playerNum = player;
 	this->playerName = (player == 0) ? A : B;
-	if (this->playerBoard != nullptr)
-		delete this->playerBoard; //avoid memory leak
+	
+	delete this->playerBoard; //avoid memory leak
 
 	this->playerBoard = new BattleBoard(board, numRows, numCols);
-
 }
-
-bool _canAttack(BattleBoard* b, int i, int j)
-{	
-	int r = (j < (b->C - 1)) ? 1 : 0;
-	int l = (j > 0) ? 1 : 0;
-	int d = (i < (b->R - 1)) ? 1 : 0;
-	int u = (i > 0) ? 1 : 0;
-
-	for (int n = i - u; n < i + d; n++)
-	{
-		for (int m = j - l; m < j + r; m++)
-		{
-			if (b->board[n][m] != ' ') return false;
-		}
-	}
-	return true;
-}
-
 
 bool BattleshipGameAlgoNaive::init(const std::string& path)
 {	
@@ -44,10 +33,7 @@ bool BattleshipGameAlgoNaive::init(const std::string& path)
 		for (int j = 0; j < this->playerBoard->C; j++)
 		{
 			if (this->playerBoard->board[i][j] != ' ') continue;
-			if (_canAttack(this->playerBoard, i, j))
-			{
-				attackQueue.push(_make_pair(i, j));
-			}
+			if (_canAttack(i, j)) attackQueue.push(_make_pair(i, j));
 		}
 	}
 	return true;
@@ -67,24 +53,7 @@ std::pair<int, int> BattleshipGameAlgoNaive::attack()
 
 void BattleshipGameAlgoNaive::notifyOnAttackResult(int player, int row, int col, AttackResult result)
 {
-	row--;
-	col--;
-	char c = this->playerBoard->board[row][col];
-	bool isOppVessel = (islower(c) && this->playerName == A) || (isupper(c) && this->playerName == B);
-	switch (result) {
-	case AttackResult::Miss:
-		this->playerBoard->board[row][col] = isOppVessel ? OpMissMark : MyMissMark;
-		break;
-	case AttackResult::Hit:
-		this->playerBoard->board[row][col] = isOppVessel ? OpHitMark : MyHitMark;
-		break;
-	case AttackResult::Sink:
-		this->playerBoard->board[row][col] = isOppVessel ? OpSinkMark : MySinkMark;
-		break;
-	default:
-		cout << "BattleshipGameAlgoNaive.notifyOnAttackResult: Something went wrong, got bad AttackResult" << endl;
-		break;
-	}
+	// nothing to do here..
 }
 
 
