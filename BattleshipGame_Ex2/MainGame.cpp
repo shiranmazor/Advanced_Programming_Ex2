@@ -399,7 +399,9 @@ int main(int argc, char **argv)
 	if (!loadAlgoDllAndInitGame(path,gameFiles,mainBoard,players, dllLoaded))
 		return -1;
 	int ret = PlayGame(path, gameFiles, players, isQuiet, delay, mainBoard);
-	
+	//delete algorithms instances
+	delete get<0>(players);
+	delete get<1>(players);
 	closeDLLs(dllLoaded);
 	if (mainBoard != NULL)
 		delete mainBoard;
