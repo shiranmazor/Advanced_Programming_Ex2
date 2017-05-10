@@ -21,8 +21,8 @@ public:
 	queue<string> movesQueue;
 
 	// Blocking Copy and Assignment
-	BattleshipGameAlgoFile(const BattleshipGameAlgoFile&) = delete;
-	BattleshipGameAlgoFile& operator = (const BattleshipGameAlgoFile&) = delete;
+	//BattleshipGameAlgoFile(const BattleshipGameAlgoFile&) = delete;
+	//BattleshipGameAlgoFile& operator = (const BattleshipGameAlgoFile&) = delete;
 
 	//constructor
 	BattleshipGameAlgoFile()

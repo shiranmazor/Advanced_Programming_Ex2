@@ -334,9 +334,6 @@ int PlayGame(string path, vector<string> gameFiles, tuple<IBattleshipGameAlgo*, 
 	std::cout << "Player A: " << gameScore.first << endl;
 	std::cout << "Player B: " << gameScore.second << endl;
 
-	//free memory
-	delete get<0>(players);
-	delete get<1>(players);
 	return 0;
 }
 
@@ -353,7 +350,7 @@ int main(int argc, char **argv)
 	_getcwd(the_path, 255);
 	path = std::string(the_path);
 	bool isQuiet = false;
-	int delay = 200;
+	int delay = 100;
 	// parse command line parameters
 	int i = 0;
 	while (i < argc)

@@ -61,20 +61,14 @@ public:
 	// constructor
 	BattleBoard(string boardFilePath, int R = 10, int C = 10) :playerToolsNum(5)
 	{
-		ifstream boardFile(boardFilePath);
+		ifstream boardFile(boardFilePath); //here assuming board file exist!
 		string temp;
 		this->R = R;
 		this->C = C;
 		this->board = new char*[this->R];
 		for (int i = 0; i < this->R; i++) this->board[i] = new char[this->C];
 
-		if (boardFile.fail())
-		{
-			cout << "Missing board file (*.sboard) looking in path: " << boardFilePath << endl;
-			boardFile.close();
-			return;
-		}
-
+		
 		for (int i = 0; i < this->R; i++)
 		{
 			std::getline(boardFile, temp);
@@ -87,10 +81,7 @@ public:
 				for (int j = int(temp.length()) - 1; j < this->C; j++) this->board[i][j] = ' ';
 			}
 
-			if (std::ifstream::eofbit) {
-				cout << "Board file (*.sboard) containing board of wrong shape, expecting " << R << "X" << C << " board, looking in path: " << boardFilePath << endl;
-				return;
-			}
+			
 		}
 		boardFile.close();
 
