@@ -14,11 +14,8 @@ IBattleshipGameAlgo* GetAlgorithm()
 void BattleshipGameAlgoFile::setBoard(int player, const char** board, int numRows, int numCols)
 {
 	this->playerNum = player;
-	if (this->playerBoard != nullptr)
-		delete this->playerBoard; //avoid memory leak
-
+	delete this->playerBoard; //avoid memory leak
 	this->playerBoard = new BattleBoard(board, numRows, numCols);
-	
 }
 
 bool BattleshipGameAlgoFile::init(const std::string& path)

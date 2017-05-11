@@ -23,9 +23,7 @@ void BattleshipGameAlgoSmart::_markIrrelevant(int i, int j) const
 void BattleshipGameAlgoSmart::setBoard(int player, const char** board, int numRows, int numCols)
 {
 	this->playerNum = player;
-	if (this->playerBoard != nullptr)
-		delete this->playerBoard; //avoid memory leak
-
+	delete this->playerBoard; //avoid memory leak
 	this->playerBoard = new BattleBoard(board, numRows, numCols);
 	this->hostileShipsNum = this->playerBoard->playerToolsNum;
 }
