@@ -126,6 +126,6 @@ public:
 	bool isBoardValid(vector<string>& error_messages);
 	pair<int, int> CalcScore();
 	int CheckVictory();
-	void getPlayerBoard(Player player, char** &pBoard);
+	void getPlayerBoard(Player player, char** &pBoard) const;
 	AttackResult performGameMove(Player p, pair<int, int> move);
 };

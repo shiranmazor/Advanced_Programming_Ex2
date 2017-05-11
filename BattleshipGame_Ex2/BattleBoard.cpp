@@ -166,7 +166,7 @@ int BattleBoard::CheckVictory()
 	return winner;
 }
 
-void BattleBoard::getPlayerBoard(Player player, char** &pBoard)
+void BattleBoard::getPlayerBoard(Player player, char** &pBoard) const
 {
 	pBoard = new char*[this->R];
 	for (int i = 0; i < this->C; i++)
