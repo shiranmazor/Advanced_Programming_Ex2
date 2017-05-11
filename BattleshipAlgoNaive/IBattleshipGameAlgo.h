@@ -12,14 +12,11 @@ enum class AttackResult {
 // IBattleshipGameAlgo for Ex2 - do not change this class - you should use it as is
 class IBattleshipGameAlgo {
 public:
-	Player playerName;
-	int playerNum;
 	virtual ~IBattleshipGameAlgo() = default;
 	virtual void setBoard(int player, const char** board, int numRows, int numCols) = 0;		// called once to notify player on his board
 	virtual bool init(const std::string& path) = 0;		// called once to allow init from files if needed returns whether the init succeeded or failed
 	virtual std::pair<int, int> attack() = 0;													// ask player for his move
 	virtual void notifyOnAttackResult(int player, int row, int col, AttackResult result) = 0;	// notify on last move result
-
 };
 static std::vector<IBattleshipGameAlgo *> _instancesVec;
 

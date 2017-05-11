@@ -13,6 +13,7 @@ using namespace std;
 class BattleshipGameAlgoNaive : public IBattleshipGameAlgo
 {
 public:
+	int playerNum;
 	BattleBoard* playerBoard = nullptr;
 	queue<pair<int,int>> attackQueue;
 	// Blocking Copy and Assignment

@@ -19,9 +19,8 @@ bool BattleshipGameAlgoNaive::_canAttack(int i, int j) const
 void BattleshipGameAlgoNaive::setBoard(int player, const char** board, int numRows, int numCols)
 {
 	this->playerNum = player;
-	this->playerName = (player == 0) ? A : B;
-	
-	delete this->playerBoard; //avoid memory leak
+	if (this->playerBoard != nullptr)
+		delete this->playerBoard; //avoid memory leak
 
 	this->playerBoard = new BattleBoard(board, numRows, numCols);
 }

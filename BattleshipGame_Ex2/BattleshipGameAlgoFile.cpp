@@ -14,7 +14,6 @@ IBattleshipGameAlgo* GetAlgorithm()
 void BattleshipGameAlgoFile::setBoard(int player, const char** board, int numRows, int numCols)
 {
 	this->playerNum = player;
-	this->playerName = (player == 0) ? A : B;
 	if (this->playerBoard != nullptr)
 		delete this->playerBoard; //avoid memory leak
 
@@ -141,7 +140,7 @@ void BattleshipGameAlgoFile::notifyOnAttackResult(int player, int row, int col, 
 	row--;
 	col--;
 	char c = this->playerBoard->board[row][col];
-	bool isOppVessel = (islower(c) && this->playerName == A) || (isupper(c) && this->playerName == B);
+	bool isOppVessel = (islower(c) && this->playerNum == A) || (isupper(c) && this->playerNum == B);
 	switch (result) {
 	case AttackResult::Miss:
 		this->playerBoard->board[row][col] = isOppVessel ? OpMissMark : MyMissMark;

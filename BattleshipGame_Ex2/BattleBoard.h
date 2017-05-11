@@ -127,5 +127,5 @@ public:
 	pair<int, int> CalcScore();
 	int CheckVictory();
 	void getPlayerBoard(Player player, char** &pBoard) const;
-	AttackResult performGameMove(Player p, pair<int, int> move);
+	AttackResult performGameMove(int p, pair<int, int> move);
 };

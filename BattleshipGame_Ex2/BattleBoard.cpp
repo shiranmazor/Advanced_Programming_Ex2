@@ -184,7 +184,7 @@ void BattleBoard::getPlayerBoard(Player player, char** &pBoard) const
 	}
 }
 
-AttackResult BattleBoard::performGameMove(Player p, pair<int, int> move)
+AttackResult BattleBoard::performGameMove(int p, pair<int, int> move)
 {
 	pair<int, int> boardMove = make_pair(move.first - 1, move.second - 1);
 	char c = this->board[boardMove.first][boardMove.second];

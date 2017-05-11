@@ -4,12 +4,10 @@
 /*
 * get current working directory path
 */
-IBattleshipGameAlgo* swapPlayer(IBattleshipGameAlgo* current, IBattleshipGameAlgo* pA, IBattleshipGameAlgo* pB)
+IBattleshipGameAlgo* swapPlayer(IBattleshipGameAlgo* current, IBattleshipGameAlgo* pA, 
+	IBattleshipGameAlgo* pB, int currentName)
 {
-	if (current->playerName == pA->playerName)
-		return pB;
-	else
-		return pA;
+	return currentName == A ? pB : pA;
 }
 
 bool dirExists(const std::string& dirName_in)
@@ -102,7 +100,7 @@ bool loadAlgoDllAndInitGame(string folder, vector<string> gameFiles , BattleBoar
 	//now let's perform setboard and init as the instruction ordered:
 	IBattleshipGameAlgo* playerA = getAlgorithmFunc1();
 	mainBoard->getPlayerBoard(A, playerBoardA);
-	playerA->setBoard(0, const_cast<const char**>(playerBoardA), mainBoard->R, mainBoard->C);
+	playerA->setBoard(A, const_cast<const char**>(playerBoardA), mainBoard->R, mainBoard->C);
 	//call init
 	if (!playerA->init(folder))
 	{
@@ -130,7 +128,7 @@ bool loadAlgoDllAndInitGame(string folder, vector<string> gameFiles , BattleBoar
 	//now let's perform setboard and init for playerB as the instruction ordered:
 	IBattleshipGameAlgo* playerB = getAlgorithmFunc2();
 	mainBoard->getPlayerBoard(B, playerBoardB);
-	playerB->setBoard(1, const_cast<const char**>(playerBoardB), mainBoard->R, mainBoard->C);
+	playerB->setBoard(B, const_cast<const char**>(playerBoardB), mainBoard->R, mainBoard->C);
 	//call init
 	if (!playerB->init(folder))
 	{
@@ -214,11 +212,11 @@ COORD GetConsoleCursorPosition(HANDLE hConsoleOutput)
 int PlayGame(string path, vector<string> gameFiles, tuple<IBattleshipGameAlgo*, IBattleshipGameAlgo*>& players, 
 	bool isQuiet, int delay, BattleBoard* mainBoard)
 {
-	Player onePlayerName; bool victory = false; int winPlayer = 2;
+	int onePlayerName; bool victory = false; int winPlayer = 2;
 	//create players object
 	IBattleshipGameAlgo* playerA = get<0>(players);
 	IBattleshipGameAlgo* playerB = get<1>(players);
-
+	
 	// init board on console
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	int firstRow = GetConsoleCursorPosition(hConsole).Y;
@@ -245,6 +243,7 @@ int PlayGame(string path, vector<string> gameFiles, tuple<IBattleshipGameAlgo*, 
 	pair<int, int> attackMove;
 	//we starts with player A
 	IBattleshipGameAlgo* currentPlayer = playerA;
+	int currentPlayerNum = A;
 	bool onePlayerGame = false;
 
 	while (!victory)
@@ -254,7 +253,7 @@ int PlayGame(string path, vector<string> gameFiles, tuple<IBattleshipGameAlgo*, 
 		
 		if (attackMove.first == -1 && attackMove.second == -1)
 		{
-			if (onePlayerGame && onePlayerName == currentPlayer->playerName)
+			if (onePlayerGame && onePlayerName == currentPlayerNum)
 			{
 				//exit while loop
 				break;
@@ -262,22 +261,25 @@ int PlayGame(string path, vector<string> gameFiles, tuple<IBattleshipGameAlgo*, 
 			else if (!onePlayerGame)
 			{
 				onePlayerGame = true;
-				currentPlayer = swapPlayer(currentPlayer, playerA, playerB);
-				onePlayerName = currentPlayer->playerName;
+				currentPlayer = swapPlayer(currentPlayer, playerA, playerB, currentPlayerNum);
+				currentPlayerNum = currentPlayerNum == A ? B : A;
+				onePlayerName = currentPlayerNum;
 			}
 			else
-				currentPlayer = swapPlayer(currentPlayer, playerA, playerB);
+			{
+				currentPlayer = swapPlayer(currentPlayer, playerA, playerB, currentPlayerNum);
+				currentPlayerNum = currentPlayerNum == A ? B : A;
+			}
+				
+
 
 			continue;
 		}
 		else if (attackMove.first < 1 || attackMove.first > 10 || attackMove.second < 1 || attackMove.second > 10)//check attack valid range
-		{
 			//ignore bad attack move from other algorithms
 			continue;
-		}
-		AttackResult moveRes = mainBoard->performGameMove(currentPlayer->playerName, attackMove);
-		
 
+		AttackResult moveRes = mainBoard->performGameMove(currentPlayerNum, attackMove);
 		// update board on consul 
 		if (!isQuiet)
 		{
@@ -299,8 +301,8 @@ int PlayGame(string path, vector<string> gameFiles, tuple<IBattleshipGameAlgo*, 
 		}
 
 		//notify both players on the moveAttak results
-		playerA->notifyOnAttackResult(currentPlayer->playerName, attackMove.first, attackMove.second, moveRes);
-		playerB->notifyOnAttackResult(currentPlayer->playerName, attackMove.first, attackMove.second, moveRes);
+		playerA->notifyOnAttackResult(currentPlayerNum, attackMove.first, attackMove.second, moveRes);
+		playerB->notifyOnAttackResult(currentPlayerNum, attackMove.first, attackMove.second, moveRes);
 
 		//check victory:
 		winPlayer = mainBoard->CheckVictory();
@@ -312,8 +314,12 @@ int PlayGame(string path, vector<string> gameFiles, tuple<IBattleshipGameAlgo*, 
 
 		// if Miss or self hit next turn is of the other player.
 		if (moveRes == AttackResult::Miss || (moveRes != AttackResult::Miss &&
-			isSelfHit(currentPlayer->playerName, mainBoard->board[attackMove.first][attackMove.second]))
-			currentPlayer = swapPlayer(currentPlayer, playerA, playerB);
+			isSelfHit(currentPlayerNum, mainBoard->board[attackMove.first][attackMove.second]))
+		{
+			currentPlayer = swapPlayer(currentPlayer, playerA, playerB, currentPlayerNum);
+			currentPlayerNum = currentPlayerNum == A ? B : A;
+		}
+			
 
 	}
 	// reset the color and cursor
@@ -341,7 +347,7 @@ int main(int argc, char **argv)
 {
 	string path; bool boardValid = true; bool dllExist = true;
 	vector<string> error_messages;
-	BattleBoard* mainBoard = NULL;
+	BattleBoard* mainBoard = nullptr;
 	vector<string> gameFiles;
 	vector<tuple<string, HINSTANCE, GetAlgorithmFuncType>>  dll_vec;
 	char the_path[256];
@@ -403,8 +409,7 @@ int main(int argc, char **argv)
 	delete get<0>(players);
 	delete get<1>(players);
 	closeDLLs(dllLoaded);
-	if (mainBoard != NULL)
-		delete mainBoard;
+	delete mainBoard;
 	return ret;
 
 }

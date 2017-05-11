@@ -50,5 +50,7 @@ void setTextColor(int color);//added for future using
 							 * performing game steps and finish the game in case of victory or finished attack steps
 							 * gameFiles contains - sboard file, attack-a file,attack-b file by this order!
 							 */
+IBattleshipGameAlgo* swapPlayer(IBattleshipGameAlgo* current, IBattleshipGameAlgo* pA,
+	IBattleshipGameAlgo* pB, int currentName);
 
 
