@@ -24,6 +24,7 @@ public:
 class BattleshipGameAlgoSmart : public IBattleshipGameAlgo
 {
 public:
+	int playerNum;
 	BattleBoard* playerBoard = nullptr;
 	targetVessel* target = nullptr;
 	int hostileShipsNum = -1;
