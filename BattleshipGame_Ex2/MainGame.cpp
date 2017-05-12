@@ -275,7 +275,7 @@ int PlayGame(string path, vector<string> gameFiles, tuple<IBattleshipGameAlgo*, 
 
 			continue;
 		}
-		else if (attackMove.first < 1 || attackMove.first > 10 || attackMove.second < 1 || attackMove.second > 10)//check attack valid range
+		else if (attackMove.first < 1 || attackMove.first > mainBoard->R || attackMove.second < 1 || attackMove.second > mainBoard->C)//check attack valid range
 			//ignore bad attack move from other algorithms
 			continue;
 
@@ -358,19 +358,22 @@ int main(int argc, char **argv)
 	bool isQuiet = false;
 	int delay = 200;
 	// parse command line parameters
-	int i = 0;
+	int i = 1; //first item is the name of the program
 	while (i < argc)
 	{
-		if (strcmp(argv[i], "-quite") == 0) {
+		if (strcmp(argv[i], "-quite") == 0)
+		{
 			isQuiet = true;
 		}
-		else if (strcmp(argv[i], "-delay") == 0) {
+		if (strcmp(argv[i], "-delay") == 0)
+		{
 			delay = atoi(argv[i + 1]);
-			i++;
+			
 		}
 		else
 		{
-			path = path = argv[i];
+			if (i == 1)//path is apearing only in the first item
+				path  = argv[i];
 		}
 		i++;
 	}
