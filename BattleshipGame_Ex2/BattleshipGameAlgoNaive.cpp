@@ -43,6 +43,9 @@ std::pair<int, int> BattleshipGameAlgoNaive::attack()
 	{
 		pair<int, int> attack = this->attackQueue.front();
 		this->attackQueue.pop();
+		//return indexes in the range of 1-10
+		attack.first++;
+		attack.second++;
 		return attack;
 	}
 	return make_pair(-1, -1);

@@ -313,8 +313,9 @@ int PlayGame(string path, vector<string> gameFiles, tuple<IBattleshipGameAlgo*, 
 		}
 
 		// if Miss or self hit next turn is of the other player.
+
 		if (moveRes == AttackResult::Miss || (moveRes != AttackResult::Miss &&
-			isSelfHit(currentPlayerNum, mainBoard->board[attackMove.first][attackMove.second]))
+			isSelfHit(currentPlayerNum, mainBoard->board[attackMove.first-1][attackMove.second-1]))
 		{
 			currentPlayer = swapPlayer(currentPlayer, playerA, playerB, currentPlayerNum);
 			currentPlayerNum = currentPlayerNum == A ? B : A;
@@ -368,7 +369,7 @@ int main(int argc, char **argv)
 		if (strcmp(argv[i], "-delay") == 0)
 		{
 			delay = atoi(argv[i + 1]);
-			
+			i++;
 		}
 		else
 		{
